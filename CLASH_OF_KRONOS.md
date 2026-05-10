@@ -4,7 +4,7 @@ This checkout is the **canonical StakeEngine/math-sdk** clone used to simulate a
 
 - **Cloned:** 2026-05-10 from `https://github.com/StakeEngine/math-sdk.git` at `origin/main` (see `git log -1`).
 - **Game folder:** `games/0_0_clash_of_kronos/` — copied from `games/0_0_lines`; `game_config.py` uses `game_id = "0_0_clash_of_kronos"` and `working_name = "Clash of Kronos"`.
-- **Previous work (Leaper’s Loot, etc.):** archived as `~/math-sdk-legacy-leapers-loot` (not this folder).
+- **Cursor / VS Code:** open **`../web-sdk/clash-of-kronos.code-workspace`** so both SDKs show under one project named **clash-of-kronos** (sibling `web-sdk` + `math-sdk` folders).
 
 ## Setup & run
 
