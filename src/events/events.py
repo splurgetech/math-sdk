@@ -15,24 +15,34 @@ def json_ready_sym(symbol: object, special_attributes: list = None):
         elif attr in symbol.defn.special_flags:
             print_sym[attr] = True
 
+    if getattr(symbol.defn, "name", None) == "CHEST":
+        pv = getattr(symbol, "prize", None)
+        unlocked = isinstance(pv, (int, float)) and pv > 0
+        print_sym["chestActive"] = unlocked
+        if unlocked:
+            print_sym["chestValue"] = int(pv)
+
     return print_sym
 
 
-def reveal_event(gamestate):
-    """Display the initial board drawn from reelstrips."""
-    board_client = []
+def padded_client_board(gamestate):
+    """5×5 client matrix (Stake padding rows) identical to reveal `board`."""
     special_attributes = list(gamestate.config.special_symbols.keys())
+    board_client = []
     for reel, _ in enumerate(gamestate.board):
         board_client.append([])
         for row in range(len(gamestate.board[reel])):
             board_client[reel].append(json_ready_sym(gamestate.board[reel][row], special_attributes))
-
     if gamestate.config.include_padding:
         for reel, _ in enumerate(board_client):
-            board_client[reel] = [json_ready_sym(gamestate.top_symbols[reel], special_attributes)] + board_client[
-                reel
-            ]
+            board_client[reel] = [json_ready_sym(gamestate.top_symbols[reel], special_attributes)] + board_client[reel]
             board_client[reel].append(json_ready_sym(gamestate.bottom_symbols[reel], special_attributes))
+    return board_client
+
+
+def reveal_event(gamestate):
+    """Display the initial board drawn from reelstrips."""
+    board_client = padded_client_board(gamestate)
 
     event = {
         "index": len(gamestate.book.events),
@@ -233,9 +243,14 @@ def tumble_board_event(gamestate):
     """States the symbol positions removed from a board during tumble, and which new symbols should take their place."""
     special_attributes = list(gamestate.config.special_symbols.keys())
 
+    exploding_seen: set[tuple[int, int]] = set()
     exploding = []
     for win in gamestate.win_data["wins"]:
         for pos in win["positions"]:
+            key = (pos["reel"], pos["row"])
+            if key in exploding_seen:
+                continue
+            exploding_seen.add(key)
             if gamestate.config.include_padding:
                 exploding.append({"reel": pos["reel"], "row": pos["row"] + 1})
             else:

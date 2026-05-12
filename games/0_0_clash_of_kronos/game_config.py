@@ -22,7 +22,7 @@ class GameConfig(Config):
         self.working_name = "Clash of Kronos"
         self.wincap = 5000.0
         self.win_type = "lines"
-        self.rtp = 0.9700
+        self.rtp = 0.9600
         self.construct_paths()
 
         # Game Dimensions
@@ -30,36 +30,30 @@ class GameConfig(Config):
         self.num_rows = [3] * self.num_reels
         # Board and Symbol Properties
         self.paytable = {
-            (5, "W"): 50,
-            (4, "W"): 20,
-            (3, "W"): 10,
-            (5, "H1"): 50,
-            (4, "H1"): 20,
-            (3, "H1"): 10,
-            (5, "H2"): 15,
-            (4, "H2"): 5,
-            (3, "H2"): 3,
-            (5, "H3"): 10,
-            (4, "H3"): 3,
-            (3, "H3"): 2,
-            (5, "H4"): 8,
-            (4, "H4"): 2,
-            (3, "H4"): 1,
-            (5, "L1"): 5,
-            (4, "L1"): 1,
-            (3, "L1"): 0.5,
-            (5, "L2"): 3,
-            (4, "L2"): 0.7,
-            (3, "L2"): 0.3,
-            (5, "L3"): 3,
-            (4, "L3"): 0.7,
-            (3, "L3"): 0.3,
-            (5, "L4"): 2,
-            (4, "L4"): 0.5,
-            (3, "L4"): 0.2,
-            (5, "L5"): 1,
-            (4, "L5"): 0.3,
-            (3, "L5"): 0.1,
+            (5, "WILD"): 50,
+            (4, "WILD"): 20,
+            (3, "WILD"): 10,
+            (5, "KRONOS_SMALL"): 50,
+            (4, "KRONOS_SMALL"): 20,
+            (3, "KRONOS_SMALL"): 10,
+            (5, "PEGASUS"): 15,
+            (4, "PEGASUS"): 5,
+            (3, "PEGASUS"): 3,
+            (5, "EAGLE"): 10,
+            (4, "EAGLE"): 3,
+            (3, "EAGLE"): 2,
+            (5, "HELMET"): 2,
+            (4, "HELMET"): 0.5,
+            (3, "HELMET"): 0.2,
+            (5, "SHIELD"): 3,
+            (4, "SHIELD"): 0.7,
+            (3, "SHIELD"): 0.3,
+            (5, "RUNE"): 5,
+            (4, "RUNE"): 1,
+            (3, "RUNE"): 0.5,
+            (5, "CHEST"): 0,
+            (4, "CHEST"): 0,
+            (3, "CHEST"): 0,
         }
 
         self.paylines = {
@@ -196,17 +190,85 @@ class GameConfig(Config):
                 2,
                 2,
             ],
-            20: [
+            21: [
+                1,
+                2,
+                2,
+                2,
+                1,
+            ],
+            22: [
+                0,
+                2,
+                0,
+                2,
+                0,
+            ],
+            23: [
+                2,
+                0,
+                2,
+                0,
+                2,
+            ],
+            24: [
+                0,
+                1,
+                2,
+                2,
+                2,
+            ],
+            25: [
+                2,
                 1,
                 0,
                 0,
                 0,
+            ],
+            26: [
+                1,
+                0,
+                2,
+                0,
+                1,
+            ],
+            27: [
+                1,
+                2,
+                0,
+                2,
+                1,
+            ],
+            28: [
+                0,
+                0,
+                0,
+                1,
+                2,
+            ],
+            29: [
+                2,
+                2,
+                2,
+                1,
+                0,
+            ],
+            30: [
+                1,
+                0,
+                1,
+                2,
                 1,
             ],
         }
 
         self.include_padding = True
-        self.special_symbols = {"wild": ["W"], "scatter": ["S"], "multiplier": ["W"]}
+        self.special_symbols = {
+            "wild": ["WILD", "WILD_LIGHTNING", "WILD_SURGE", "WILD_HAMMER", "WILD_EAGLE"],
+            "scatter": ["SCATTER"],
+            "multiplier": ["WILD", "WILD_LIGHTNING", "WILD_SURGE", "WILD_HAMMER", "WILD_EAGLE"],
+            "prize": ["CHEST"],
+        }
 
         self.freespin_triggers = {
             self.basegame_type: {3: 8, 4: 12, 5: 15},
@@ -224,7 +286,7 @@ class GameConfig(Config):
 
         self.padding_reels[self.basegame_type] = self.reels["BR0"]
         self.padding_reels[self.freegame_type] = self.reels["FR0"]
-        self.padding_symbol_values = {"W": {"multiplier": {2: 100, 3: 50, 4: 50, 5: 50, 10: 30, 20: 20, 50: 5}}}
+        self.padding_symbol_values = {"WILD": {"multiplier": {2: 100, 3: 50, 4: 50, 5: 50, 10: 30, 20: 20, 50: 5}}}
 
         freegame_condition = {
             "reel_weights": {
