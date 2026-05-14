@@ -5,7 +5,7 @@ from game_calculations import GameCalculations
 from game_kronos_bar import KronosBarState, apply_kronos_bolts
 from game_events import update_grid_mult_event, kronos_bar_event, kronos_strike_event
 from src.calculations.cluster import Cluster
-from src.events.events import update_freespin_event
+from src.events.events import fs_trigger_event, update_freespin_event
 
 
 class GameExecutables(GameCalculations):
@@ -111,12 +111,31 @@ class GameExecutables(GameCalculations):
             self.tot_fs = min(self.tot_fs, cap)
 
     def update_freespin_amount(self, scatter_key: str = "scatter") -> None:
-        super().update_freespin_amount(scatter_key)
+        """Set initial FS count; clamp before trigger event so book ``totalFs`` matches cap."""
+        self.record(
+            {
+                "kind": self.count_special_symbols(scatter_key),
+                "symbol": scatter_key,
+                "gametype": self.gametype,
+            }
+        )
+        self.tot_fs = self.config.freespin_triggers[self.gametype][
+            self.count_special_symbols(scatter_key)
+        ]
         self._clamp_tot_fs()
+        if self.gametype == self.config.basegame_type:
+            basegame_trigger, freegame_trigger = True, False
+        else:
+            basegame_trigger, freegame_trigger = False, True
+        fs_trigger_event(self, basegame_trigger=basegame_trigger, freegame_trigger=freegame_trigger)
 
     def update_fs_retrigger_amt(self, scatter_key: str = "scatter") -> None:
-        super().update_fs_retrigger_amt(scatter_key)
+        """Add retriggers; clamp before trigger event so book ``totalFs`` never exceeds cap."""
+        self.tot_fs += self.config.freespin_triggers[self.gametype][
+            self.count_special_symbols(scatter_key)
+        ]
         self._clamp_tot_fs()
+        fs_trigger_event(self, freegame_trigger=True, basegame_trigger=False)
 
     def update_freespin(self) -> None:
         """Called before each FS reveal."""

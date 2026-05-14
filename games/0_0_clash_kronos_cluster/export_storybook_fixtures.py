@@ -8,6 +8,11 @@ Usage (from this directory):
     python export_storybook_fixtures.py
     python export_storybook_fixtures.py --bonus-only   # skip base; only read books_bonus.json
 
+Environment (bonus export):
+    BONUS_POOL_MAX — max books written to bonus_pool.json (default 25, clamped 1–100).
+      Bonus named picks and pool are taken after a fixed-seed shuffle of the loaded
+      books so the pool is not always the same leading slice of the sim output.
+
 Writes JSON fixture files to:
     ../../web-sdk (auto-detected) or via --out-dir flag:
     <out_dir>/apps/clash-kronos-cluster/src/stories/data/math_fixtures/
@@ -27,13 +32,22 @@ import sys
 import os
 import json
 import argparse
+import random
 
 _GAME_DIR = os.path.dirname(os.path.abspath(__file__))
 _SDK_ROOT = os.path.abspath(os.path.join(_GAME_DIR, "..", ".."))
 _WEB_SDK_ROOT = os.path.abspath(os.path.join(_SDK_ROOT, "..", "web-sdk"))
 _FIXTURES_RELPATH = "apps/clash-kronos-cluster/src/stories/data/math_fixtures"
-# Bonus pool: FS books are longer than base; keep repo size small.
-BONUS_POOL_MAX = 25
+# Bonus pool: FS books are longer than base; default cap keeps repo size small.
+_DEFAULT_BONUS_POOL_MAX = 25
+_BONUS_POOL_MAX_CAP = 100
+_BONUS_NAMED_JSON = (
+    "bonus_short",
+    "bonus_retrigger",
+    "bonus_with_strike",
+    "bonus_long",
+    "bonus_many_retrigger",
+)
 
 
 def load_books(path: str) -> list:
@@ -122,7 +136,7 @@ def select_fixtures(books: list) -> tuple[dict[str, dict], list]:
     ]
 
 
-def select_bonus_fixtures(books: list) -> tuple[dict[str, dict], list]:
+def select_bonus_fixtures(books: list, pool_max: int) -> tuple[dict[str, dict], list]:
     """Pick bonus (freegame) fixtures and a trimmed pool for Storybook."""
     with_trigger = [b for b in books if has_type(b, "freeSpinTrigger")]
     bonus_short = min(with_trigger, key=lambda b: len(b["events"]), default=None)
@@ -144,12 +158,23 @@ def select_bonus_fixtures(books: list) -> tuple[dict[str, dict], list]:
         else None
     )
 
-    pool_books = books[:BONUS_POOL_MAX]
+    bonus_long = max(with_trigger, key=lambda b: len(b["events"]), default=None)
+
+    with_retrigger_evt = [b for b in books if has_type(b, "freeSpinRetrigger")]
+    bonus_many_retrigger = (
+        max(with_retrigger_evt, key=lambda b: count_type(b, "freeSpinRetrigger"))
+        if with_retrigger_evt
+        else None
+    )
+
+    pool_books = books[:pool_max]
 
     selections = {
         "bonus_short": bonus_short,
         "bonus_retrigger": retrigger,
         "bonus_with_strike": bonus_with_strike,
+        "bonus_long": bonus_long,
+        "bonus_many_retrigger": bonus_many_retrigger,
     }
     named = {k: to_fixture(v) for k, v in selections.items() if v is not None}
     pool = [to_fixture(b) for b in pool_books]
@@ -238,14 +263,31 @@ def main():
 
     if len(bonus_books) == 0:
         print("\nNo bonus books in pool — writing empty bonus_pool.json; removing named bonus_*.json.")
-        for name in ("bonus_short", "bonus_retrigger", "bonus_with_strike"):
+        for name in _BONUS_NAMED_JSON:
             p = os.path.join(fixtures_dir, f"{name}.json")
             if os.path.isfile(p):
                 os.remove(p)
                 print(f"  Removed stale: {os.path.basename(p)}")
         write_pool([], os.path.join(fixtures_dir, "bonus_pool.json"))
     else:
-        bonus_fixtures, bonus_pool = select_bonus_fixtures(bonus_books)
+        try:
+            raw_max = int(os.environ.get("BONUS_POOL_MAX", str(_DEFAULT_BONUS_POOL_MAX)))
+        except ValueError:
+            raw_max = _DEFAULT_BONUS_POOL_MAX
+        bonus_pool_max = max(1, min(raw_max, _BONUS_POOL_MAX_CAP))
+        if raw_max != bonus_pool_max:
+            print(
+                f"  BONUS_POOL_MAX={raw_max!r} → using {bonus_pool_max} "
+                f"(clamped 1–{_BONUS_POOL_MAX_CAP})"
+            )
+
+        random.seed(0)
+        shuffled_bonus = list(bonus_books)
+        random.shuffle(shuffled_bonus)
+
+        bonus_fixtures, bonus_pool = select_bonus_fixtures(
+            shuffled_bonus, pool_max=bonus_pool_max
+        )
 
         if not args.no_validate:
             for name, fix in bonus_fixtures.items():
