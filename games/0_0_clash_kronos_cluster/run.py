@@ -1,4 +1,14 @@
-"""Main entry point for Clash Kronos Cluster math simulation."""
+"""Main entry point for Clash Kronos Cluster math simulation.
+
+Full RTP-style batch (no artificial FS cap on ``tot_fs``):
+
+    KRONOS_UNCAPPED_FS=1 SIM_BASE=200000 SIM_BONUS=200000 python run.py
+
+Omit ``KRONOS_UNCAPPED_FS`` to keep ``GameConfig.max_total_freespins`` (default 50).
+Override counts with ``SIM_BASE`` / ``SIM_BONUS`` (integers per bet mode).
+"""
+
+import os
 
 from gamestate import GameState
 from game_config import GameConfig
@@ -17,10 +27,10 @@ if __name__ == "__main__":
     compression = True
     profiling = False
 
-    # Small counts while developing — increase once sims are stable
+    # Default: substantial batch for RTP/tail work. Override: SIM_BASE / SIM_BONUS env (ints).
     num_sim_args = {
-        "base": 100,
-        "bonus": 100,
+        "base": int(os.environ.get("SIM_BASE", "200000")),
+        "bonus": int(os.environ.get("SIM_BONUS", "200000")),
     }
 
     run_conditions = {

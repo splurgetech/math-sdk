@@ -2,18 +2,21 @@
 Export Storybook fixture books from math-sdk simulation output.
 
 Prerequisites: run `python run_fixtures.py` first to generate
-library/books/books_base.json.
+library/books/books_base.json and library/books/books_bonus.json.
 
 Usage (from this directory):
     python export_storybook_fixtures.py
+    python export_storybook_fixtures.py --bonus-only   # skip base; only read books_bonus.json
 
 Writes JSON fixture files to:
     ../../web-sdk (auto-detected) or via --out-dir flag:
     <out_dir>/apps/clash-kronos-cluster/src/stories/data/math_fixtures/
 
-Each fixture is a JSON object: { "gameType": "basegame", "events": [...] }
-matching the shape of golden_base_book.ts so Storybook can use it with:
+Each fixture is a JSON object: { "gameType": "...", "events": [...] } for Storybook:
     playBet({ ...fixture, state: fixture.events })
+
+Named outputs: base_*.json, base_pool.json, bonus_*.json (when selectable),
+bonus_pool.json.
 
 Run workflow:
     python run_fixtures.py
@@ -29,6 +32,8 @@ _GAME_DIR = os.path.dirname(os.path.abspath(__file__))
 _SDK_ROOT = os.path.abspath(os.path.join(_GAME_DIR, "..", ".."))
 _WEB_SDK_ROOT = os.path.abspath(os.path.join(_SDK_ROOT, "..", "web-sdk"))
 _FIXTURES_RELPATH = "apps/clash-kronos-cluster/src/stories/data/math_fixtures"
+# Bonus pool: FS books are longer than base; keep repo size small.
+BONUS_POOL_MAX = 25
 
 
 def load_books(path: str) -> list:
@@ -53,8 +58,41 @@ def to_fixture(book: dict) -> dict:
     return {"gameType": game_type, "events": events}
 
 
-def select_fixtures(books: list) -> dict[str, dict]:
-    """Pick one representative book per category; return {name: fixture}."""
+def _win_positions(win_info: dict) -> set[tuple[int, int]]:
+    out: set[tuple[int, int]] = set()
+    for w in win_info.get("wins", []):
+        for p in w.get("positions", []):
+            out.add((int(p["reel"]), int(p["row"])))
+    return out
+
+
+def validate_tumble_win_chain(events: list, label: str) -> list[str]:
+    """
+    Light invariant check: each tumbleBoard's explodingSymbols should match the
+    immediately preceding winInfo cluster(s) (avoids Storybook tumble desync).
+    """
+    errs: list[str] = []
+    last_win: set[tuple[int, int]] | None = None
+    for i, e in enumerate(events):
+        t = e.get("type")
+        if t == "winInfo":
+            last_win = _win_positions(e)
+        elif t == "tumbleBoard":
+            if last_win is None:
+                continue
+            for p in e.get("explodingSymbols", []):
+                key = (int(p["reel"]), int(p["row"]))
+                if key not in last_win:
+                    errs.append(
+                        f"{label} event[{i}] tumbleBoard: explode {key} "
+                        f"not in preceding winInfo positions"
+                    )
+            last_win = None
+    return errs
+
+
+def select_fixtures(books: list) -> tuple[dict[str, dict], list]:
+    """Pick one representative base book per category; return (named fixtures, pool)."""
     no_win = next((b for b in books if not has_type(b, "winInfo")), None)
     one_cluster = next(
         (b for b in books if count_type(b, "winInfo") == 1), None
@@ -84,6 +122,40 @@ def select_fixtures(books: list) -> dict[str, dict]:
     ]
 
 
+def select_bonus_fixtures(books: list) -> tuple[dict[str, dict], list]:
+    """Pick bonus (freegame) fixtures and a trimmed pool for Storybook."""
+    with_trigger = [b for b in books if has_type(b, "freeSpinTrigger")]
+    bonus_short = min(with_trigger, key=lambda b: len(b["events"]), default=None)
+
+    retrigger = next(
+        (
+            b
+            for b in books
+            if has_type(b, "freeSpinRetrigger")
+            or count_type(b, "freeSpinTrigger") >= 2
+        ),
+        None,
+    )
+
+    strike_books = [b for b in books if has_type(b, "kronosStrike")]
+    bonus_with_strike = (
+        min(strike_books, key=lambda b: len(b["events"]), default=None)
+        if strike_books
+        else None
+    )
+
+    pool_books = books[:BONUS_POOL_MAX]
+
+    selections = {
+        "bonus_short": bonus_short,
+        "bonus_retrigger": retrigger,
+        "bonus_with_strike": bonus_with_strike,
+    }
+    named = {k: to_fixture(v) for k, v in selections.items() if v is not None}
+    pool = [to_fixture(b) for b in pool_books]
+    return named, pool
+
+
 def write_fixture(fixture: dict, path: str) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
@@ -106,29 +178,95 @@ def main():
         default=None,
         help="web-sdk root (default: auto-detect from repo layout)",
     )
+    parser.add_argument(
+        "--bonus-only",
+        action="store_true",
+        help="Only export bonus fixtures (skip base); use when books_base.json is absent or base fixtures are unchanged.",
+    )
+    parser.add_argument(
+        "--no-validate",
+        action="store_true",
+        help="Skip tumbleBoard vs preceding winInfo checks (not recommended).",
+    )
     args = parser.parse_args()
 
     web_sdk = args.out_dir or _WEB_SDK_ROOT
     fixtures_dir = os.path.join(web_sdk, _FIXTURES_RELPATH)
 
-    base_books_path = os.path.join(_GAME_DIR, "library", "books", "books_base.json")
-    if not os.path.exists(base_books_path):
-        print(f"ERROR: {base_books_path} not found — run `python run_fixtures.py` first.")
+    if not args.bonus_only:
+        base_books_path = os.path.join(_GAME_DIR, "library", "books", "books_base.json")
+        if not os.path.exists(base_books_path):
+            print(f"ERROR: {base_books_path} not found — run `python run_fixtures.py` first.")
+            sys.exit(1)
+
+        print(f"\nLoading books from: {base_books_path}")
+        books = load_books(base_books_path)
+        print(f"  {len(books)} books loaded")
+
+        fixtures, pool = select_fixtures(books)
+
+        print(f"\nWriting fixtures to: {fixtures_dir}")
+        for name, fixture in fixtures.items():
+            write_fixture(fixture, os.path.join(fixtures_dir, f"{name}.json"))
+
+        write_pool(pool, os.path.join(fixtures_dir, "base_pool.json"))
+
+        if not args.no_validate:
+            for name, fix in fixtures.items():
+                ve = validate_tumble_win_chain(fix["events"], name)
+                if ve:
+                    print("VALIDATION FAILED:\n  " + "\n  ".join(ve))
+                    sys.exit(1)
+            for bi, fix in enumerate(pool):
+                ve = validate_tumble_win_chain(fix["events"], f"base_pool[{bi}]")
+                if ve:
+                    print("VALIDATION FAILED:\n  " + "\n  ".join(ve))
+                    sys.exit(1)
+
+        print(f"\nSelected {len(fixtures)} named base fixtures + pool ({len(pool)} books).")
+    else:
+        print("\n--bonus-only: skipping base fixture export.")
+
+    bonus_books_path = os.path.join(_GAME_DIR, "library", "books", "books_bonus.json")
+    if not os.path.exists(bonus_books_path):
+        print(f"ERROR: {bonus_books_path} not found — run `python run_fixtures.py` first.")
         sys.exit(1)
 
-    print(f"\nLoading books from: {base_books_path}")
-    books = load_books(base_books_path)
-    print(f"  {len(books)} books loaded")
+    print(f"\nLoading bonus books from: {bonus_books_path}")
+    bonus_books = load_books(bonus_books_path)
+    print(f"  {len(bonus_books)} books loaded")
 
-    fixtures, pool = select_fixtures(books)
+    if len(bonus_books) == 0:
+        print("\nNo bonus books in pool — writing empty bonus_pool.json; removing named bonus_*.json.")
+        for name in ("bonus_short", "bonus_retrigger", "bonus_with_strike"):
+            p = os.path.join(fixtures_dir, f"{name}.json")
+            if os.path.isfile(p):
+                os.remove(p)
+                print(f"  Removed stale: {os.path.basename(p)}")
+        write_pool([], os.path.join(fixtures_dir, "bonus_pool.json"))
+    else:
+        bonus_fixtures, bonus_pool = select_bonus_fixtures(bonus_books)
 
-    print(f"\nWriting fixtures to: {fixtures_dir}")
-    for name, fixture in fixtures.items():
-        write_fixture(fixture, os.path.join(fixtures_dir, f"{name}.json"))
+        if not args.no_validate:
+            for name, fix in bonus_fixtures.items():
+                ve = validate_tumble_win_chain(fix["events"], name)
+                if ve:
+                    print("VALIDATION FAILED:\n  " + "\n  ".join(ve))
+                    sys.exit(1)
+            for bi, fix in enumerate(bonus_pool):
+                ve = validate_tumble_win_chain(fix["events"], f"bonus_pool[{bi}]")
+                if ve:
+                    print("VALIDATION FAILED:\n  " + "\n  ".join(ve))
+                    sys.exit(1)
 
-    write_pool(pool, os.path.join(fixtures_dir, "base_pool.json"))
+        for name, fixture in bonus_fixtures.items():
+            write_fixture(fixture, os.path.join(fixtures_dir, f"{name}.json"))
 
-    print(f"\nSelected {len(fixtures)} named fixtures + pool ({len(pool)} books).")
+        write_pool(bonus_pool, os.path.join(fixtures_dir, "bonus_pool.json"))
+
+        print(
+            f"\nSelected {len(bonus_fixtures)} named bonus fixtures + pool ({len(bonus_pool)} books)."
+        )
     print("Done.")
 
 

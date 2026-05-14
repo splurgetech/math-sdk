@@ -6,8 +6,37 @@ from src.calculations.board import Board
 from src.config.config import Config
 
 
+def _numeric_cell_mult(value: int) -> int:
+    """Only stored multipliers >= 2 contribute to the cluster sum (0 and pending -1 do not)."""
+    if isinstance(value, int) and value >= 2:
+        return value
+    return 0
+
+
 class GameCalculations(Executables):
     """Override evaluate_clusters to use basePay * max(1, sum(cellMults))."""
+
+    def create_board_reelstrips(self) -> None:
+        """Use scatter-free FR0 when total FS is already at cap (``FR0_NS`` on ``GameConfig``)."""
+        cap = getattr(self.config, "max_total_freespins", None)
+        if (
+            self.gametype == self.config.freegame_type
+            and isinstance(cap, int)
+            and cap > 0
+            and self.tot_fs >= cap
+            and "FR0_NS" in self.config.reels
+        ):
+            cond = self.get_current_distribution_conditions()
+            rw = cond["reel_weights"]
+            fg_key = self.config.freegame_type
+            saved_fg = rw[fg_key]
+            rw[fg_key] = {"FR0_NS": 1}
+            try:
+                super().create_board_reelstrips()
+            finally:
+                rw[fg_key] = saved_fg
+            return
+        super().create_board_reelstrips()
 
     def evaluate_clusters_with_grid(
         self,
@@ -29,8 +58,8 @@ class GameCalculations(Executables):
                 if (n, sym) not in config.paytable:
                     continue
 
-                # Sum cell multipliers; first win has all zeros so max(1, 0) = 1
-                cell_mult_sum = sum(pos_mult_grid[p[0]][p[1]] for p in cluster)
+                # Sum numeric cell mults only; pending (-1) and 0 contribute 0 → max(1, 0)=1 on fresh/ticket-only clusters
+                cell_mult_sum = sum(_numeric_cell_mult(pos_mult_grid[p[0]][p[1]]) for p in cluster)
                 effective_mult = max(1, cell_mult_sum) * global_multiplier
                 base_pay = config.paytable[(n, sym)]
                 win = base_pay * effective_mult

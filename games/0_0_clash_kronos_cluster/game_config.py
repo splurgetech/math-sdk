@@ -1,6 +1,8 @@
 """Clash Kronos Cluster game configuration."""
 
 import os
+from copy import deepcopy
+
 from src.config.config import Config
 from src.config.distributions import Distribution
 from src.config.betmode import BetMode
@@ -33,18 +35,17 @@ class GameConfig(Config):
         self.paytable = self._build_paytable()
 
         self.include_padding = True
-        # No wilds — scatter only
-        self.special_symbols = {"scatter": ["S"]}
+        # Scatter on reels; ``W`` exists only from Kronos bolts (not on strips)
+        self.special_symbols = {"scatter": ["S"], "wild": ["W"]}
 
-        # 3-7 scatters → 10/12/15/20/30 free spins; 8+ treated same as 7
+        # 3-7 scatters → 10/12/15/20/30 free spins; 8+ same as 7. Same ladder for base entry
+        # and for retriggers during freegame (``gametype`` selects the table in executables).
         self.freespin_triggers = {
             self.basegame_type: {3: 10, 4: 12, 5: 15, 6: 20, 7: 30},
-            self.freegame_type: {3: 10, 4: 12, 5: 15, 6: 20, 7: 30},
         }
-        for gt in [self.basegame_type, self.freegame_type]:
-            for n in range(8, self.num_reels * max(self.num_rows) + 1):
-                self.freespin_triggers[gt][n] = 30
-        # Anticipation from 2 scatters (min trigger - 1)
+        for n in range(8, self.num_reels * max(self.num_rows) + 1):
+            self.freespin_triggers[self.basegame_type][n] = 30
+        self.freespin_triggers[self.freegame_type] = deepcopy(self.freespin_triggers[self.basegame_type])
         self.anticipation_triggers = {
             self.basegame_type: min(self.freespin_triggers[self.basegame_type].keys()) - 1,
             self.freegame_type: min(self.freespin_triggers[self.freegame_type].keys()) - 1,
@@ -55,10 +56,20 @@ class GameConfig(Config):
         # Kronos bar fills at this count
         self.kronos_bar_threshold = 20
 
+        # Hard ceiling on total FS (initial + retriggers). ``0`` = no clamp (see ``KRONOS_UNCAPPED_FS``).
+        self.max_total_freespins = 50
+        if os.environ.get("KRONOS_UNCAPPED_FS") == "1":
+            self.max_total_freespins = 0
+
         reels = {"BR0": "BR0.csv", "FR0": "FR0.csv"}
         self.reels = {}
         for r, f in reels.items():
             self.reels[r] = self.read_reels_csv(os.path.join(self.reels_path, f))
+
+        # Scatter-free FR0: same layout as FR0 but ``S`` → ``L1`` so at-cap free spins never show scatters.
+        self.reels["FR0_NS"] = [
+            ["L1" if cell == "S" else cell for cell in col] for col in self.reels["FR0"]
+        ]
 
         mode_maxwins = {"base": 5000, "bonus": 5000}
 

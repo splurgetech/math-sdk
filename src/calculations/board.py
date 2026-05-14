@@ -225,18 +225,25 @@ class Board(GeneralGameState):
         Note: If it is possible for two target symbols to appear on one reel, this method
         will not be able to guarantee an exact number of target symbols or actually random
         reel positions. I.e. Ensure the reels do not have stacked scatter symbols.
+
+        For special symbols (e.g. scatter), accept ``count >= num_force_syms``: stacked
+        strips or random fills on other reels can exceed the targeted minimum; forcing an
+        exact match can otherwise loop forever.
         """
+        max_tries = 50_000
+        tries = 0
         while True:
+            tries += 1
+            if tries > max_tries:
+                raise RuntimeError(
+                    f"force_special_board exceeded {max_tries} tries for "
+                    f"{force_criteria!r} (target {num_force_syms})"
+                )
             self._force_special_board(force_criteria, num_force_syms)
-            if (
-                force_criteria in self.config.special_symbols
-                and self.count_special_symbols(force_criteria) == num_force_syms
-            ):
-                break
-            elif (
-                not (force_criteria in self.config.special_symbols)
-                and self.count_symbols_on_board(force_criteria) == num_force_syms
-            ):
+            if force_criteria in self.config.special_symbols:
+                if self.count_special_symbols(force_criteria) >= num_force_syms:
+                    break
+            elif self.count_symbols_on_board(force_criteria) == num_force_syms:
                 break
 
     def _force_special_board(self, force_criteria: str, num_force_syms: int) -> None:

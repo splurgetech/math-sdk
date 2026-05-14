@@ -1,4 +1,4 @@
-"""Pure functions for the Kronos bar state machine and strike."""
+"""Pure functions for the Kronos bar state machine and bolt wild strike."""
 
 import random
 
@@ -11,25 +11,35 @@ def count_exploded_symbols(win_data: dict) -> int:
     return total
 
 
-def apply_strike(grid: list, num_reels: int, num_rows: list) -> list:
-    """Choose 3-6 random cells (with replacement) and apply strike effects.
+def apply_kronos_bolts(board, symbol_storage, num_reels: int, num_rows: list) -> list:
+    """Place 4–10 wilds on unique random visible cells. Mutates board in place.
 
-    Returns list of hit dicts: [{reel, row}, ...] in order.
-    Effect per hit:
-      - cell has no overlay (0) -> set to 2
-      - cell has overlay -> double it (cap at 128)
+    Scatter cells are never replaced so a buy-bonus / forced-FS board cannot lose
+    its trigger scatters before ``check_freespin_entry`` runs.
+
+    Each hit replaces the symbol at (reel, row) with a new ``W`` instance.
+
+    Returns list of hit dicts ``[{reel, row}, ...]`` in strike order.
     """
-    hit_count = random.randint(3, 6)
+    bolt_count = random.randint(4, 10)
+    max_cells = sum(num_rows[r] for r in range(num_reels))
+    n = min(bolt_count, max_cells)
+    pairs = set()
     hits = []
-    for _ in range(hit_count):
+    max_attempts = max(5000, n * 500)
+    attempts = 0
+    while len(pairs) < n and attempts < max_attempts:
+        attempts += 1
         reel = random.randint(0, num_reels - 1)
         row = random.randint(0, num_rows[reel] - 1)
+        key = (reel, row)
+        if key in pairs:
+            continue
+        if board[reel][row].check_attribute("scatter"):
+            continue
+        pairs.add(key)
         hits.append({"reel": reel, "row": row})
-        current = grid[reel][row]
-        if current == 0:
-            grid[reel][row] = 2
-        else:
-            grid[reel][row] = min(current * 2, 128)
+        board[reel][row] = symbol_storage.create_symbol("W")
     return hits
 
 
