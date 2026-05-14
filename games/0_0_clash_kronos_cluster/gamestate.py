@@ -62,6 +62,8 @@ class GameState(GameStateOverride):
     def run_freespin(self):
         self.reset_fs_spin()
         while self.fs < self.tot_fs:
+            # Fresh bar each free spin; tumbles within this spin still fill it via apply_kronos_bar_after_tumble.
+            self.reset_kronos_bar()
             self.update_freespin()
             self._kronos_fs_trace("after_update_freespin")
             self.draw_board()

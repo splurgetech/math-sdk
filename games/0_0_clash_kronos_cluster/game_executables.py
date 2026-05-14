@@ -32,9 +32,10 @@ class GameExecutables(GameCalculations):
         ]
 
     def reset_kronos_bar(self):
-        """Create a fresh bar state for this spin sequence."""
+        """Create a fresh bar state for this spin sequence; emit empty bar for book / client sync."""
         self.kronos_bar = KronosBarState(self.config.kronos_bar_threshold)
         self.kronos_strike_pending = False
+        kronos_bar_event(self, progress=0, filled=False)
 
     def update_grid_mults(self):
         """Sugar Rush ladder: empty → pending ticket; pending → 2×; then double (capped).

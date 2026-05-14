@@ -66,6 +66,9 @@ class GameConfig(Config):
         for r, f in reels.items():
             self.reels[r] = self.read_reels_csv(os.path.join(self.reels_path, f))
 
+        # At most one scatter per reel on any 7-high window (circular strip); avoids stacked S.
+        self._sanitize_scatter_spacing_on_reel_strips()
+
         # Scatter-free FR0: same layout as FR0 but ``S`` → ``L1`` so at-cap free spins never show scatters.
         self.reels["FR0_NS"] = [
             ["L1" if cell == "S" else cell for cell in col] for col in self.reels["FR0"]
@@ -143,6 +146,38 @@ class GameConfig(Config):
                 ],
             ),
         ]
+
+    def _scatter_id_names(self) -> set[str]:
+        return set(self.special_symbols.get("scatter", []))
+
+    def _sanitize_one_reel_strip_column(self, column: list[str], window: int) -> list[str]:
+        """Circular strip: at most one scatter symbol in any ``window`` consecutive positions (one per reel column view)."""
+        scatter_names = self._scatter_id_names()
+        if not column or not scatter_names:
+            return column
+        repl = "L1"
+        out = list(column)
+        n = len(out)
+        changed = True
+        while changed:
+            changed = False
+            for i in range(n):
+                if out[i] not in scatter_names:
+                    continue
+                for k in range(1, window):
+                    j = (i - k) % n
+                    if out[j] in scatter_names:
+                        out[i] = repl
+                        changed = True
+                        break
+        return out
+
+    def _sanitize_scatter_spacing_on_reel_strips(self) -> None:
+        window = max(self.num_rows) if self.num_rows else 7
+        for strip_id, cols in list(self.reels.items()):
+            self.reels[strip_id] = [
+                self._sanitize_one_reel_strip_column(col, window) for col in cols
+            ]
 
     def _build_paytable(self) -> dict:
         """Per-exact-size paytable for cluster sizes 5..49. Placeholder values."""

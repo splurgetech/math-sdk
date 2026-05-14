@@ -14,10 +14,9 @@ class GameStateOverride(GameExecutables):
         self.reset_kronos_bar()
 
     def reset_fs_spin(self):
-        """FS entry: grid multipliers persist; only reset bar."""
+        """FS entry: grid multipliers persist. Kronos bar resets each free spin in ``run_freespin``."""
         super().reset_fs_spin()
         # Do NOT call reset_grid_mults() here — FS overlays persist.
-        self.reset_kronos_bar()
 
     def assign_special_sym_function(self):
         pass
