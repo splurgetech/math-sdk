@@ -7,6 +7,8 @@ from src.config.config import Config
 from src.config.distributions import Distribution
 from src.config.betmode import BetMode
 
+from paytable_sugar_rush1000 import build_sugar_rush_style_paytable
+
 
 class GameConfig(Config):
     """Singleton config for Clash Kronos Cluster."""
@@ -23,16 +25,20 @@ class GameConfig(Config):
         self.game_id = "0_0_clash_kronos_cluster"
         self.provider_number = 0
         self.working_name = "Clash of Kronos (Cluster)"
-        self.wincap = 5000.0
+        self.wincap = 25000.0
         self.win_type = "cluster"
-        self.rtp = 0.9700
+        # Stake-style headline RTP (~96.5%); realized RTP still requires sim tuning + pay ladder.
+        self.rtp = 0.965
         self.construct_paths()
 
         # 7x7 grid, no wilds
         self.num_reels = 7
         self.num_rows = [7] * self.num_reels
 
-        self.paytable = self._build_paytable()
+        # Stepped cluster pays (sizes 5–14 + 15+ bucket); see paytable_sugar_rush1000.py.
+        # Default scale << 1: raw SR ladder + FS/mult rules overshoots ~96.5% RTP; tune via PAYTABLE_SCALE.
+        self.paytable_scale = float(os.environ.get("PAYTABLE_SCALE", "0.003"))
+        self.paytable = build_sugar_rush_style_paytable(self.paytable_scale)
 
         self.include_padding = True
         # Scatter on reels; ``W`` exists only from Kronos bolts (not on strips)
@@ -74,7 +80,7 @@ class GameConfig(Config):
             ["L1" if cell == "S" else cell for cell in col] for col in self.reels["FR0"]
         ]
 
-        mode_maxwins = {"base": 5000, "bonus": 5000}
+        mode_maxwins = {"base": 25000, "bonus": 25000}
 
         self.bet_modes = [
             BetMode(
@@ -178,17 +184,3 @@ class GameConfig(Config):
             self.reels[strip_id] = [
                 self._sanitize_one_reel_strip_column(col, window) for col in cols
             ]
-
-    def _build_paytable(self) -> dict:
-        """Per-exact-size paytable for cluster sizes 5..49. Placeholder values."""
-        paytable = {}
-        base_pays = {
-            "H1": 5.0, "H2": 2.0,
-            "M1": 1.0, "M2": 0.7,
-            "L1": 0.5, "L2": 0.3, "L3": 0.2,
-        }
-        growth = 1.35
-        for sym, pay5 in base_pays.items():
-            for n in range(5, 50):
-                paytable[(n, sym)] = round(pay5 * (growth ** (n - 5)), 4)
-        return paytable

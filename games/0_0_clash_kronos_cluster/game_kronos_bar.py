@@ -12,34 +12,36 @@ def count_exploded_symbols(win_data: dict) -> int:
 
 
 def apply_kronos_bolts(board, symbol_storage, num_reels: int, num_rows: list) -> list:
-    """Place 4–10 wilds on unique random visible cells. Mutates board in place.
+    """Replace every visible cell of one random paying symbol with ``W``.
 
-    Scatter cells are never replaced so a buy-bonus / forced-FS board cannot lose
-    its trigger scatters before ``check_freespin_entry`` runs.
+    The victim symbol is chosen uniformly from **names that appear on the board**
+    at least once (excluding scatter and existing wilds). Scatter is never replaced.
 
-    Each hit replaces the symbol at (reel, row) with a new ``W`` instance.
+    If no eligible symbol exists (e.g. only scatters), returns ``hits=[]``; the strike
+    event is still emitted so the client can run bolt VFX.
 
-    Returns list of hit dicts ``[{reel, row}, ...]`` in strike order.
+    ``hits`` lists ``{reel, row}`` in reel-major, top-to-bottom order (same order as replacements).
     """
-    bolt_count = random.randint(4, 10)
-    max_cells = sum(num_rows[r] for r in range(num_reels))
-    n = min(bolt_count, max_cells)
-    pairs = set()
+    names_present = set()
+    for reel in range(num_reels):
+        for row in range(num_rows[reel]):
+            cell = board[reel][row]
+            if cell.check_attribute("scatter"):
+                continue
+            if cell.name == "W":
+                continue
+            names_present.add(cell.name)
+
+    if not names_present:
+        return []
+
+    victim = random.choice(list(names_present))
     hits = []
-    max_attempts = max(5000, n * 500)
-    attempts = 0
-    while len(pairs) < n and attempts < max_attempts:
-        attempts += 1
-        reel = random.randint(0, num_reels - 1)
-        row = random.randint(0, num_rows[reel] - 1)
-        key = (reel, row)
-        if key in pairs:
-            continue
-        if board[reel][row].check_attribute("scatter"):
-            continue
-        pairs.add(key)
-        hits.append({"reel": reel, "row": row})
-        board[reel][row] = symbol_storage.create_symbol("W")
+    for reel in range(num_reels):
+        for row in range(num_rows[reel]):
+            if board[reel][row].name == victim:
+                hits.append({"reel": reel, "row": row})
+                board[reel][row] = symbol_storage.create_symbol("W")
     return hits
 
 

@@ -3,6 +3,8 @@
 Clusters of 5 or more like-symbols are removed from the board, and symbols above on the reelstrip
 fall to fill their place.
 
+**Math targets (config):** headline RTP **~96.5%** (`GameConfig.rtp`), win cap **25,000×** bet, cluster pays from a **Sugar Rush 1000–style stepped ladder** (sizes 5–14 + 15+ bucket; see `paytable_sugar_rush1000.py`) multiplied by **`PAYTABLE_SCALE`** (env; default **0.003** in `game_config`). Raise/lower scale and re-run `run.py` to move empirical RTP. Realized RTP still comes from strips + FS rules — tune after major rule changes.
+
 #### Basegame:
 Standard tumbling game with Scatter and Wild symbols.
 Minimum of **3** scatter symbols on the visible board are required to enter free spins (see ``freespin_triggers`` for counts).

@@ -51,12 +51,18 @@ class WinManager:
             raise RuntimeError("Must define a valid gametype")
 
     def update_end_round_wins(self):
-        """Accumulate total wins for a given betting round."""
-        base = min(self.max_allowed_win, self.basegame_wins)
-        free = min(self.max_allowed_win, self.freegame_wins)
-        self.total_cumulative_wins += base + free
-        self.cumulative_base_wins += base
-        self.cumulative_free_wins += free
+        """Accumulate total wins for a given betting round.
+
+        Single cap on ``basegame_wins + freegame_wins`` (matches one-round ``wincap``),
+        with base attributed first then free for split diagnostics.
+        """
+        total = self.basegame_wins + self.freegame_wins
+        capped = min(self.max_allowed_win, total)
+        to_base = min(self.basegame_wins, capped)
+        to_free = capped - to_base
+        self.total_cumulative_wins += capped
+        self.cumulative_base_wins += to_base
+        self.cumulative_free_wins += to_free
 
     def reset_end_round_wins(self):
         """Reset wins at end of gameround/simulation."""

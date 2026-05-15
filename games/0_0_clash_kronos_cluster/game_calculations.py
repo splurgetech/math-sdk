@@ -55,13 +55,14 @@ class GameCalculations(Executables):
         for sym in clusters:
             for cluster in clusters[sym]:
                 n = len(cluster)
-                if (n, sym) not in config.paytable:
+                n_eff = min(n, 15)
+                if (n_eff, sym) not in config.paytable:
                     continue
 
                 # Sum numeric cell mults only; pending (-1) and 0 contribute 0 → max(1, 0)=1 on fresh/ticket-only clusters
                 cell_mult_sum = sum(_numeric_cell_mult(pos_mult_grid[p[0]][p[1]]) for p in cluster)
                 effective_mult = max(1, cell_mult_sum) * global_multiplier
-                base_pay = config.paytable[(n, sym)]
+                base_pay = config.paytable[(n_eff, sym)]
                 win = base_pay * effective_mult
                 total_win += win
 
