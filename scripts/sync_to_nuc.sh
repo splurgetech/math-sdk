@@ -48,12 +48,6 @@ if [[ "$AHEAD" != "0" ]]; then
 fi
 
 echo "=== git pull on NUC ==="
-nuc_ssh "powershell -NoProfile -Command \"
-  Set-Location \\\$HOME\\$(nuc_repo_path);
-  if (-not (Test-Path .git)) { throw 'Not a git repo. Run scripts/nuc_bootstrap.sh from Mac once.' }
-  git fetch origin;
-  git checkout $BRANCH;
-  git pull origin $BRANCH;
-\""
+nuc_ssh "cd $(nuc_repo_path) && git fetch origin && git checkout $BRANCH && git pull origin $BRANCH"
 
 echo "=== Sync done (GitHub -> NUC) ==="
