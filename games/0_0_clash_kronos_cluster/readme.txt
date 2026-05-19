@@ -16,6 +16,9 @@ Same basegame rule, except grid positions have multiplier overlays (Sugar Rush s
 Because of the separation between basegame and freegame types - there is an additional freespin entry check to check of the criteria requires a forced 
 freespin condition. Otherwise, occurences of Scatter symbols tumbling onto the board during basegame criteria may appear.
 
+#### Windows NUC setup
+See ``docs/NUC_WINDOWS_SETUP.md`` and ``scripts/setup_windows.ps1`` (math-sdk only; web-sdk not required on sim machine).
+
 #### Full math sims (`run.py`)
 From this directory:
 
