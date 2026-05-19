@@ -41,7 +41,7 @@ nuc_ssh "powershell -NoProfile -ExecutionPolicy Bypass -Command \"
 \""
 
 echo "=== Install Python 3.12 on NUC (if missing) ==="
-nuc_ssh "powershell -NoProfile -ExecutionPolicy Bypass -File \"\$HOME/$(nuc_repo_path)/scripts/nuc_install_python312.ps1\"" || true
+nuc_ssh "powershell -NoProfile -ExecutionPolicy Bypass -File C:/Users/evanl/math-sdk/scripts/nuc_install_python312.ps1" || true
 
 echo "=== setup_windows + smoke test ==="
 nuc_ssh "powershell -NoProfile -ExecutionPolicy Bypass -Command \"
