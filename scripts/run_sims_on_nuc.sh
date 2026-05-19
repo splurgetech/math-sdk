@@ -25,6 +25,7 @@ nuc_ssh "powershell -NoProfile -ExecutionPolicy Bypass -Command \"
   \\\$env:PAYTABLE_SCALE='$PAYTABLE_SCALE';
   Remove-Item Env:KRONOS_UNCAPPED_FS -ErrorAction SilentlyContinue;
   .\\scripts\\run_clash_kronos_sims.ps1 -SimBase $SIM_BASE -SimBonus $SIM_BONUS -PaytableScale $PAYTABLE_SCALE;
+  if (\\\$LASTEXITCODE -ne 0) { exit \\\$LASTEXITCODE }
 \""
 
 echo "=== Sims finished. Pull results: ./scripts/pull_library_from_nuc.sh ==="

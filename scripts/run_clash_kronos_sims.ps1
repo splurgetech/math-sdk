@@ -29,5 +29,6 @@ if ($UncappedFs) { $env:KRONOS_UNCAPPED_FS = "1" } else { Remove-Item Env:KRONOS
 Set-Location $GameDir
 Write-Host "SIM_BASE=$SimBase SIM_BONUS=$SimBonus PAYTABLE_SCALE=$($env:PAYTABLE_SCALE) KRONOS_UNCAPPED_FS=$($env:KRONOS_UNCAPPED_FS)" -ForegroundColor Cyan
 & $venvPy run.py
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 Write-Host "Done. Lookups: $GameDir\library\lookup_tables\" -ForegroundColor Green
