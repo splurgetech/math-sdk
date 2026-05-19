@@ -1,19 +1,14 @@
 #!/usr/bin/env bash
 # Copy math-sdk from this Mac to a Windows NUC over SSH (OpenSSH on Windows).
 #
-# Usage:
-#   export NUC_USER=YourWindowsUsername
-#   export NUC_IP=192.168.1.50
-#   ./scripts/sync_from_mac.sh
-#
-# Requires: rsync and ssh (built into macOS). On Windows target, OpenSSH Server running.
+# Legacy tar sync — prefer ./scripts/sync_to_nuc.sh (git) or --local.
+# Requires Host nuc in ~/.ssh/config (see docs/NUC_WINDOWS_SETUP.md).
 
 set -euo pipefail
-REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-NUC_USER="${NUC_USER:?Set NUC_USER (Windows username)}"
-NUC_IP="${NUC_IP:?Set NUC_IP (e.g. 192.168.1.50)}"
-# Windows OpenSSH often wants forward slashes in path after C:
-DEST="${NUC_USER}@${NUC_IP}:/C/Users/${NUC_USER}/math-sdk/"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+source "$SCRIPT_DIR/nuc_common.sh"
+DEST="${NUC_HOST}:$(nuc_repo_path)/"
 
 echo "Syncing $REPO_ROOT -> $DEST"
 rsync -avz --progress \
@@ -26,7 +21,4 @@ rsync -avz --progress \
   "$REPO_ROOT/" "$DEST"
 
 echo ""
-echo "On the NUC (PowerShell):"
-echo "  cd \$HOME\\math-sdk"
-echo "  .\\scripts\\setup_windows.ps1"
-echo "  .\\scripts\\smoke_test_windows.ps1"
+echo "Prefer: ./scripts/sync_to_nuc.sh --local"

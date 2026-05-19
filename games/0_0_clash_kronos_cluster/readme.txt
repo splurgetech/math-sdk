@@ -17,7 +17,7 @@ Because of the separation between basegame and freegame types - there is an addi
 freespin condition. Otherwise, occurences of Scatter symbols tumbling onto the board during basegame criteria may appear.
 
 #### Windows NUC setup
-See ``docs/NUC_WINDOWS_SETUP.md`` and ``scripts/setup_windows.ps1`` (math-sdk only; web-sdk not required on sim machine).
+See ``docs/NUC_WINDOWS_SETUP.md``. Mac: ``ssh nuc``, ``./scripts/sync_to_nuc.sh``, ``./scripts/run_sims_on_nuc.sh``, ``./scripts/pull_library_from_nuc.sh``. One-time: ``./scripts/nuc_bootstrap.sh``.
 
 #### Full math sims (`run.py`)
 From this directory:

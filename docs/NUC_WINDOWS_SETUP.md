@@ -1,155 +1,87 @@
-# NUC (Windows) — Math SDK only
+# NUC (Windows) — long-term math-sdk setup
 
-You only need **math-sdk** on the NUC for RTP sims. **web-sdk** stays on your Mac.
+**Only `math-sdk` on the NUC.** `web-sdk` stays on your Mac.
 
-I (Cursor) cannot SSH into your NUC from the cloud. Use this guide + the scripts in `scripts/` to get an identical, correct setup.
-
----
-
-## What you need on the NUC
-
-| Install | Why |
-|--------|-----|
-| **Python 3.12+** | [python.org](https://www.python.org/downloads/) — check **“Add python.exe to PATH”** |
-| **Git for Windows** | Clone repo + `requirements.txt` git dependency |
-| **OpenSSH Server** (optional) | So your Mac can `ssh` / `scp` without a USB stick |
-
-You do **not** need Node, pnpm, or web-sdk on the NUC.
+Mac is where you **edit**; NUC is where you **run sims**. GitHub (`splurgetech/math-sdk`) is the source of truth.
 
 ---
 
-## Option A — Clone from GitHub (easiest if `main` is up to date)
+## SSH (Mac)
 
-On the NUC, in **PowerShell**:
+`~/.ssh/config` includes:
 
-```powershell
-cd $HOME
-git clone https://github.com/splurgetech/math-sdk.git
-cd math-sdk
-Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-.\scripts\setup_windows.ps1
-.\scripts\smoke_test_windows.ps1
+```
+Host nuc
+  HostName 192.168.84.161
+  User evanl
+  IdentityFile ~/.ssh/winpc
 ```
 
-If you use another branch:
+Test: `ssh nuc "hostname"`
 
-```powershell
-cd $HOME\math-sdk
-git fetch origin
-git checkout your-branch-name
-.\scripts\setup_windows.ps1
-```
+### IP address (read this once)
+
+`192.168.84.161` is assigned by your **router (DHCP)**. It can change after reboot unless you **reserve** it:
+
+1. Open router admin (often `192.168.84.1` or similar).
+2. Find DHCP / “connected devices” → NUC `DESKTOP-DT8I9DF`.
+3. **Reserve** IP `192.168.84.161` for the NUC’s MAC address.
+
+If the IP changes, update `HostName` in `~/.ssh/config` or fix the reservation.
 
 ---
 
-## Option B — Copy from your Mac (unpushed local changes)
+## One-time NUC bootstrap (fresh git clone + Python 3.12 + venv)
 
-On your **Mac** (replace `NUC_USER` and `NUC_IP`):
+On **Mac**, from `math-sdk` (commit & push first):
 
 ```bash
-# One-time: exclude venv and generated library bulk
-cd /Users/evanlegator/math-sdk
-rsync -avz --progress \
-  --exclude 'env/' \
-  --exclude '.git/' \
-  --exclude 'games/*/library/temp_multi_threaded_files/' \
-  --exclude 'games/*/library/publish_files/*.zst' \
-  ./ NUC_USER@NUC_IP:C:/Users/NUC_USER/math-sdk/
+chmod +x scripts/*.sh
+./scripts/nuc_bootstrap.sh
 ```
 
-Then on the **NUC**:
-
-```powershell
-cd $HOME\math-sdk
-.\scripts\setup_windows.ps1
-```
-
-Or push to GitHub from the Mac and use Option A on the NUC.
+This clones `https://github.com/splurgetech/math-sdk.git` to `C:\Users\evanl\math-sdk`, installs Python 3.12 if needed, runs `setup_windows.ps1` + smoke test.
 
 ---
 
-## Enable SSH on the NUC (optional, recommended)
+## Daily workflow
 
-On the **NUC** (PowerShell **as Administrator**):
+| Step | Mac command |
+|------|-------------|
+| Sync code | `./scripts/sync_to_nuc.sh` |
+| Uncommitted Mac changes | `./scripts/sync_to_nuc.sh --local` (tar; use sparingly) |
+| Run sims (default 150k base, 0 bonus) | `./scripts/run_sims_on_nuc.sh` |
+| Custom counts | `./scripts/run_sims_on_nuc.sh 150000 0 0.003` |
+| Pull results | `./scripts/pull_library_from_nuc.sh` |
 
-```powershell
-Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
-Start-Service sshd
-Set-Service -Name sshd -StartupType Automatic
-New-NetFirewallRule -Name "OpenSSH-Server-In-TCP" -DisplayName "OpenSSH Server (sshd)" -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
-```
+**RTP tuning:** adjust `PAYTABLE_SCALE` (3rd arg to `run_sims_on_nuc.sh`). **Optimization** (weighted lookup to 96.5%) is a later step on Mac or NUC after Rust is installed.
 
-Find the NUC username: `whoami`  
-Find the IP: `ipconfig` (e.g. `192.168.1.50`)
-
-From your **Mac**:
-
-```bash
-ssh NUC_USER@NUC_IP
-```
-
-First copy of the repo via SCP:
-
-```bash
-scp -r /Users/evanlegator/math-sdk NUC_USER@NUC_IP:C:/Users/NUC_USER/
-# Then on NUC rename if needed and run setup_windows.ps1
-```
+**Production FS cap:** default runs use 50 max FS (do not set `KRONOS_UNCAPPED_FS` unless researching tails).
 
 ---
 
-## Daily use on the NUC
+## NUC paths
 
-```powershell
-cd $HOME\math-sdk
-.\env\Scripts\Activate.ps1
-
-# Base-only batch (good first overnight run)
-.\scripts\run_clash_kronos_sims.ps1 -SimBase 150000 -SimBonus 0 -PaytableScale 0.003
-
-# Bonus-only on same NUC (run after base, or separate session)
-.\scripts\run_clash_kronos_sims.ps1 -SimBase 0 -SimBonus 50000 -PaytableScale 0.003
-```
-
-Check mean return (unweighted) after base sims:
-
-```powershell
-# In PowerShell from game folder — rough RTP check
-$rows = Import-Csv "games\0_0_clash_kronos_cluster\library\lookup_tables\lookUpTable_base.csv" -Header id,weight,payout
-$mean = ($rows.payout | Measure-Object -Average).Average
-Write-Host "Mean payoutMultiplier (cents): $mean ; RTP fraction ~ $($mean/100)"
-```
-
-Copy `library\` back to the Mac when done (Finder share, `scp`, or git commit + push from NUC if you use a branch).
+| Item | Path |
+|------|------|
+| Repo | `C:\Users\evanl\math-sdk` |
+| Sim output | `games\0_0_clash_kronos_cluster\library\` |
+| Lookup tables | `library\lookup_tables\` |
+| Publish (books/LUT) | `library\publish_files\` |
 
 ---
 
-## Rust (only for optimization later)
+## Python
 
-Sims (`run.py`) do **not** need Rust. When you enable `run_optimization: True`:
-
-1. Install Rust: https://rustup.rs/ (Windows MSVC toolchain)
-2. Restart PowerShell, then run optimization from repo per `run.py`
+Stake docs recommend **Python ≥ 3.12**. The NUC uses **`py -3.12`** via `scripts\nuc_install_python312.ps1` (winget) when missing.
 
 ---
 
 ## Troubleshooting
 
-| Problem | Fix |
+| Issue | Fix |
 |--------|-----|
-| `python` not found | Reinstall Python with **Add to PATH**; try `py -3.12` |
-| `ExecutionPolicy` blocks scripts | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
-| `pip install` fails on git URL | Install **Git for Windows**; reopen PowerShell |
-| Process **Killed** / out of memory | Lower `-SimBonus`; run base and bonus in separate runs |
-| `num_sims/(batch*threads)` error | Use sim counts divisible by `10 * 50000` or lower `batching_size` in `run.py` |
-| Very slow | Normal on 2017 NUC; run overnight |
-
----
-
-## Repo reminder
-
-| Repo | NUC? | Purpose |
-|------|------|---------|
-| **math-sdk** | Yes | `run.py`, RTP, books, lookups |
-| **web-sdk** | No | Storybook / frontend on Mac only |
-
-Fixture export (`export_storybook_fixtures.py`) can run on the Mac after you copy `library/` back.
+| `Permission denied` SSH | Use `ssh nuc`; check `~/.ssh/winpc` on NUC `authorized_keys` |
+| `Not a git repo` on NUC | Run `./scripts/nuc_bootstrap.sh` |
+| Sim OOM | Lower bonus sims; run base only: `./scripts/run_sims_on_nuc.sh 150000 0` |
+| numpy build fail | Use Python 3.12 + `setup_windows.ps1`, not raw 3.14 without wheels |

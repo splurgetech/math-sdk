@@ -20,8 +20,20 @@ function Test-Python312([string]$Exe, [string[]]$Args = @()) {
 
 $pyCmd = $null
 if (Get-Command py -ErrorAction SilentlyContinue) {
-    if (Test-Python312 "py" @("-3.12")) { $pyCmd = @("py", "-3.12") }
-    elseif (Test-Python312 "py" @("-3")) { $pyCmd = @("py", "-3") }
+    # Prefer a launcher that can actually create a venv (3.12 entry may exist but be uninstalled).
+    foreach ($args in @(@("-3.12"), @("-3"))) {
+        if (Test-Python312 "py" $args) {
+            $probe = Join-Path $env:TEMP "mathsdk_venv_probe"
+            Remove-Item -Recurse -Force $probe -ErrorAction SilentlyContinue
+            & py @args -m venv $probe 2>$null
+            if (Test-Path (Join-Path $probe "Scripts\python.exe")) {
+                Remove-Item -Recurse -Force $probe -ErrorAction SilentlyContinue
+                $pyCmd = @("py") + $args
+                break
+            }
+            Remove-Item -Recurse -Force $probe -ErrorAction SilentlyContinue
+        }
+    }
 }
 if (-not $pyCmd -and (Get-Command python -ErrorAction SilentlyContinue)) {
     if (Test-Python312 "python") { $pyCmd = @("python") }
