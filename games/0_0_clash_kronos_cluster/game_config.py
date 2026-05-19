@@ -36,8 +36,8 @@ class GameConfig(Config):
         self.num_rows = [7] * self.num_reels
 
         # Stepped cluster pays (sizes 5–14 + 15+ bucket); see paytable_sugar_rush1000.py.
-        # Calibrated from 150k sims at 0.003 (mean ~4.32×); ~0.0007 targets ~1× pre-optimization.
-        self.paytable_scale = float(os.environ.get("PAYTABLE_SCALE", "0.0007"))
+        # Full SR1000-style ladder (× bet). Tune RTP via distributions + Rust optimization, not sub-cent scale.
+        self.paytable_scale = float(os.environ.get("PAYTABLE_SCALE", "1.0"))
         self.paytable = build_sugar_rush_style_paytable(self.paytable_scale)
 
         self.include_padding = True
@@ -62,7 +62,8 @@ class GameConfig(Config):
         # Kronos bar fills at this count
         self.kronos_bar_threshold = 20
 
-        # Hard ceiling on total FS (initial + retriggers). ``0`` = no clamp (see ``KRONOS_UNCAPPED_FS``).
+        # Hard ceiling on total FS (initial + retriggers). Production always 50 (wincap + cert).
+        # KRONOS_UNCAPPED_FS=1 disables cap for research only — do not use for publish sims.
         self.max_total_freespins = 50
         if os.environ.get("KRONOS_UNCAPPED_FS") == "1":
             self.max_total_freespins = 0
@@ -94,13 +95,13 @@ class GameConfig(Config):
                 distributions=[
                     Distribution(
                         criteria="freegame",
-                        quota=0.1,
+                        quota=0.03,
                         conditions={
                             "reel_weights": {
                                 self.basegame_type: {"BR0": 1},
                                 self.freegame_type: {"FR0": 1},
                             },
-                            "scatter_triggers": {3: 5, 4: 3, 5: 1},
+                            "scatter_triggers": {3: 8, 4: 2, 5: 1},
                             "force_wincap": False,
                             "force_freegame": True,
                         },
@@ -144,7 +145,7 @@ class GameConfig(Config):
                                 self.freegame_type: {"FR0": 1},
                             },
                             # Bonus buy always enters FS with >=3 scatters
-                            "scatter_triggers": {3: 5, 4: 3, 5: 1},
+                            "scatter_triggers": {3: 8, 4: 2, 5: 1},
                             "force_wincap": False,
                             "force_freegame": True,
                         },

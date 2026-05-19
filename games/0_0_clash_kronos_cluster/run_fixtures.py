@@ -47,6 +47,12 @@ for p in [_SDK_ROOT, _GAME_DIR]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
+# winInfo/setTotalWin store int cents (round(win * 100)). Production PAYTABLE_SCALE
+# (default 0.0007) makes most cluster pays < $0.01 → Storybook shows $0.00.
+# Fixture runs default to scale 1.0 unless PAYTABLE_SCALE is set explicitly.
+if not os.environ.get("PAYTABLE_SCALE"):
+    os.environ["PAYTABLE_SCALE"] = "1.0"
+
 from game_config import GameConfig
 from gamestate import GameState
 from src.wins.win_manager import WinManager

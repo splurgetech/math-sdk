@@ -9,6 +9,19 @@ $repo = Split-Path -Parent $PSScriptRoot
 $gameDir = Join-Path $repo "games\0_0_clash_kronos_cluster"
 $py = Join-Path $repo "env\Scripts\python.exe"
 
+# MSVC link.exe required for `cargo run --release` (non-interactive SSH has no Developer shell PATH).
+$vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
+if (Test-Path $vswhere) {
+    $vsRoot = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath 2>$null
+    if ($vsRoot) {
+        $linkDir = Get-ChildItem (Join-Path $vsRoot "VC\Tools\MSVC\*\bin\Hostx64\x64\link.exe") -ErrorAction SilentlyContinue |
+            Select-Object -First 1 -ExpandProperty DirectoryName
+        if ($linkDir) {
+            $env:Path = "$linkDir;$env:USERPROFILE\.cargo\bin;$env:Path"
+        }
+    }
+}
+
 Set-Location $gameDir
 $env:RUN_SIMS = "0"
 $env:RUN_OPTIMIZATION = "1"

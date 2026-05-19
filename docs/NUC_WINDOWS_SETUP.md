@@ -61,11 +61,11 @@ Restart PowerShell or ensure `%USERPROFILE%\.cargo\bin` is on **PATH** for SSH s
 |------|-------------|
 | Sync code | `./scripts/sync_to_nuc.sh` |
 | Uncommitted Mac changes | `./scripts/sync_to_nuc.sh --local` (tar; use sparingly) |
-| Run sims (default 150k base, 0 bonus, scale **0.0007**) | `./scripts/run_sims_on_nuc.sh` |
-| Custom counts / scale | `./scripts/run_sims_on_nuc.sh 150000 0 0.0007` |
+| Run sims (default 150k base, 0 bonus, scale **1.0**) | `./scripts/run_sims_on_nuc.sh` |
+| Custom counts / scale | `./scripts/run_sims_on_nuc.sh 150000 0 1.0` |
 | Pull results | `./scripts/pull_library_from_nuc.sh` |
 | RTP from pulled CSVs | `./scripts/rtp_from_lookup.sh` |
-| Optimization only (after sims; Rust required) | `./scripts/run_optimization_on_nuc.sh` |
+| Optimization only (after sims; Rust required) | **Mac (recommended):** `./scripts/run_optimization.sh` — CPU-heavy, light on RAM. **NUC:** `./scripts/run_optimization_on_nuc.sh` (needs MSVC Build Tools) |
 
 **Production FS cap:** default runs use 50 max FS (do not set `KRONOS_UNCAPPED_FS` unless researching tails).
 
@@ -79,7 +79,7 @@ Use **one SSH** to the NUC and redirect on the Mac:
 
 ```bash
 cd /Users/evanlegator/math-sdk
-nohup ssh nuc "cd math-sdk && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_clash_kronos_sims.ps1 -SimBase 150000 -SimBonus 0 -PaytableScale 0.0007" \
+nohup ssh -n nuc "cd math-sdk && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_clash_kronos_sims.ps1 -SimBase 150000 -SimBonus 0 -PaytableScale 1.0" \
   > ~/nuc-sim.log 2>&1 </dev/null &
 disown
 tail -f ~/nuc-sim.log
@@ -87,10 +87,14 @@ tail -f ~/nuc-sim.log
 
 ---
 
-## RTP: scale then optimize
+## RTP: sims on NUC, optimize on Mac (recommended)
 
-1. **Pay ladder:** `PAYTABLE_SCALE` in [`game_config.py`](../games/0_0_clash_kronos_cluster/game_config.py) (default **0.0007**) or override per run (3rd arg to `run_sims_on_nuc.sh`). Tune until unweighted mean from `lookUpTable_base.csv` is roughly **0.8–1.5×** (see `rtp_from_lookup.sh`).
-2. **Shippable ~96.5% RTP:** run the Rust optimizer (`RUN_OPTIMIZATION=1`). Weighted tables: `library/publish_files/lookUpTable_base_0.csv`. Verify with `./scripts/rtp_from_lookup.sh` (weighted line vs bet cost **1.0** base, **100.0** bonus).
+1. **Raw sims on NUC** (keeps Mac RAM free): `./scripts/run_sims_on_nuc.sh` — default **full ladder** (`PAYTABLE_SCALE=1.0`), **freegame quota 0.03**, **max 50 FS** (never `KRONOS_UNCAPPED_FS` for publish).
+2. **Pull library:** `./scripts/pull_library_from_nuc.sh`
+3. **Optimize on Mac:** install [Rust](https://rustup.rs), `cd optimization_program && cargo build --release`, then `./scripts/run_optimization.sh` (or `OPT_MODES=base ./scripts/run_optimization.sh`). Uses CPU; typically fine on a laptop while you work.
+4. **Verify:** `./scripts/rtp_from_lookup.sh` — weighted `lookUpTable_base_0.csv` should be ~**0.965**.
+
+NUC optimization is optional (`./scripts/run_optimization_on_nuc.sh`) if MSVC Build Tools are installed.
 
 `run.py` env flags (from `games/0_0_clash_kronos_cluster/`):
 
@@ -138,4 +142,5 @@ Stake docs recommend **Python ≥ 3.12**. The NUC uses **`py -3.12`** via `scrip
 | Sim OOM | Lower bonus sims; run base only: `./scripts/run_sims_on_nuc.sh 150000 0` |
 | numpy build fail | Use Python 3.12 + `setup_windows.ps1`, not raw 3.14 without wheels |
 | Optimization fails (`cargo` not found) | Run `scripts\nuc_install_rust.ps1`; add `%USERPROFILE%\.cargo\bin` to PATH |
+| Optimization fails (`link.exe` not found) | Run `scripts\nuc_install_rust.ps1` (installs VS 2022 Build Tools + C++ via winget). Reboot NUC if winget asks. Then `cd optimization_program` and `cargo build --release`. `run_opt_on_nuc.ps1` prepends MSVC to PATH for SSH. |
 | Post-quantum SSH warnings on Mac | Harmless on LAN; optional `WarnWeakCrypto no` under `Host nuc` |

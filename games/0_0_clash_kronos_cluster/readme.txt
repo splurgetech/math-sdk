@@ -3,7 +3,7 @@
 Clusters of 5 or more like-symbols are removed from the board, and symbols above on the reelstrip
 fall to fill their place.
 
-**Math targets (config):** headline RTP **~96.5%** (`GameConfig.rtp`), win cap **25,000×** bet, cluster pays from a **Sugar Rush 1000–style stepped ladder** (sizes 5–14 + 15+ bucket; see `paytable_sugar_rush1000.py`) multiplied by **`PAYTABLE_SCALE`** (env; default **0.0007** in `game_config`). Raise/lower scale and re-run `run.py` to move empirical RTP; then **Rust optimization** (`RUN_OPTIMIZATION=1`, see `run.py` and `docs/NUC_WINDOWS_SETUP.md`) for weighted ~96.5% on `lookUpTable_*_0.csv`. Measure with `scripts/rtp_from_lookup.sh`.
+**Math targets (config):** headline RTP **~96.5%** (`GameConfig.rtp`), win cap **25,000×** bet, cluster pays from a **Sugar Rush 1000–style stepped ladder** (sizes 5–14 + 15+ bucket; see `paytable_sugar_rush1000.py`) multiplied by **`PAYTABLE_SCALE`** (env; default **1.0** in `game_config`). Base betmode uses **freegame quota 0.03** and forced-entry scatters **{3:8, 4:2, 5:1}**. Tune raw RTP with distributions/reels/features; then **Rust optimization** (`RUN_OPTIMIZATION=1`, see `run.py` and `docs/NUC_WINDOWS_SETUP.md`) for weighted ~96.5% on `lookUpTable_*_0.csv`. Measure with `scripts/rtp_from_lookup.sh`.
 
 #### Basegame:
 Standard tumbling game with Scatter and Wild symbols.
@@ -36,6 +36,7 @@ Outputs under this game’s library / temp paths per the shared ``create_books``
 #### Storybook fixtures (web-sdk)
 From this directory:
   python run_fixtures.py
+`run_fixtures.py` defaults `PAYTABLE_SCALE=1.0` when unset (same as production default).
 writes `library/books/books_base.json` and `library/books/books_bonus.json` (gitignored).
 By default `FIXTURE_BONUS_SIMS=0` so `books_bonus.json` is **empty** and `run_fixtures.py`
 finishes quickly. Set `FIXTURE_BONUS_SIMS` to a positive integer when you can afford the
