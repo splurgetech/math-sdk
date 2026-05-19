@@ -36,8 +36,8 @@ class GameConfig(Config):
         self.num_rows = [7] * self.num_reels
 
         # Stepped cluster pays (sizes 5–14 + 15+ bucket); see paytable_sugar_rush1000.py.
-        # Default scale << 1: raw SR ladder + FS/mult rules overshoots ~96.5% RTP; tune via PAYTABLE_SCALE.
-        self.paytable_scale = float(os.environ.get("PAYTABLE_SCALE", "0.003"))
+        # Calibrated from 150k sims at 0.003 (mean ~4.32×); ~0.0007 targets ~1× pre-optimization.
+        self.paytable_scale = float(os.environ.get("PAYTABLE_SCALE", "0.0007"))
         self.paytable = build_sugar_rush_style_paytable(self.paytable_scale)
 
         self.include_padding = True

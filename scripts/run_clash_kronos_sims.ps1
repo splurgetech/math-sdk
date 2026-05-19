@@ -7,7 +7,7 @@
 param(
     [int]$SimBase = 50000,
     [int]$SimBonus = 0,
-    [string]$PaytableScale = "",
+    [string]$PaytableScale = "0.0007",
     [switch]$UncappedFs
 )
 

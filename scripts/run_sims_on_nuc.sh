@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/nuc_common.sh"
 
 SIM_BASE="${1:-150000}"
 SIM_BONUS="${2:-0}"
-PAYTABLE_SCALE="${3:-0.003}"
+PAYTABLE_SCALE="${3:-0.0007}"
 
 "$SCRIPT_DIR/sync_to_nuc.sh"
 
