@@ -1,5 +1,7 @@
 """Optimization parameters for Clash Kronos Cluster."""
 
+import os
+
 from optimization_program.optimization_config import (
     ConstructScaling,
     ConstructParameters,
@@ -15,6 +17,11 @@ class OptimizationSetup:
         wincaps = {}
         for bm in game_config.bet_modes:
             wincaps[bm.get_name()] = bm.get_wincap()
+        ultra = os.environ.get("OPT_ULTRA") == "1"
+        fast = os.environ.get("OPT_FAST") == "1" or ultra
+        num_show = 400 if ultra else (1000 if fast else 5000)
+        num_per_fence = 400 if ultra else (2000 if fast else 10000)
+        sim_trials = 200 if ultra else (500 if fast else 5000)
         self.game_config.opt_params = {
             "base": {
                 "conditions": {
@@ -32,12 +39,12 @@ class OptimizationSetup:
                     ]
                 ).return_dict(),
                 "parameters": ConstructParameters(
-                    num_show=5000,
-                    num_per_fence=10000,
+                    num_show=num_show,
+                    num_per_fence=num_per_fence,
                     min_m2m=4,
                     max_m2m=8,
                     pmb_rtp=1.0,
-                    sim_trials=5000,
+                    sim_trials=sim_trials,
                     test_spins=[50, 100, 200],
                     test_weights=[0.3, 0.4, 0.3],
                     score_type="rtp",
@@ -60,12 +67,12 @@ class OptimizationSetup:
                     ]
                 ).return_dict(),
                 "parameters": ConstructParameters(
-                    num_show=5000,
-                    num_per_fence=10000,
+                    num_show=num_show,
+                    num_per_fence=num_per_fence,
                     min_m2m=4,
                     max_m2m=8,
                     pmb_rtp=1.0,
-                    sim_trials=5000,
+                    sim_trials=sim_trials,
                     test_spins=[10, 20, 50],
                     test_weights=[0.6, 0.2, 0.2],
                     score_type="rtp",

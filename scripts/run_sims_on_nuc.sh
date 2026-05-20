@@ -3,8 +3,9 @@
 #
 # Usage:
 #   ./scripts/run_sims_on_nuc.sh
-#   ./scripts/run_sims_on_nuc.sh 150000 0          # SimBase SimBonus
-#   ./scripts/run_sims_on_nuc.sh 150000 0 0.003    # + PAYTABLE_SCALE
+#   ./scripts/run_sims_on_nuc.sh 50000 0 1.0       # SimBase SimBonus PAYTABLE_SCALE
+#
+# RTP iteration: always pass 1.0 for scale; tune via game_config / reels, not PAYTABLE_SCALE.
 #
 set -euo pipefail
 

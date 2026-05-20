@@ -95,20 +95,20 @@ class GameConfig(Config):
                 distributions=[
                     Distribution(
                         criteria="freegame",
-                        quota=0.03,
+                        quota=0.015,
                         conditions={
                             "reel_weights": {
                                 self.basegame_type: {"BR0": 1},
                                 self.freegame_type: {"FR0": 1},
                             },
-                            "scatter_triggers": {3: 8, 4: 2, 5: 1},
+                            "scatter_triggers": {3: 10, 4: 1, 5: 1},
                             "force_wincap": False,
                             "force_freegame": True,
                         },
                     ),
                     Distribution(
                         criteria="0",
-                        quota=0.4,
+                        quota=0.45,
                         win_criteria=0.0,
                         conditions={
                             "reel_weights": {self.basegame_type: {"BR0": 1}},
@@ -118,7 +118,7 @@ class GameConfig(Config):
                     ),
                     Distribution(
                         criteria="basegame",
-                        quota=0.5,
+                        quota=0.45,
                         conditions={
                             "reel_weights": {self.basegame_type: {"BR0": 1}},
                             "force_wincap": False,
@@ -145,7 +145,7 @@ class GameConfig(Config):
                                 self.freegame_type: {"FR0": 1},
                             },
                             # Bonus buy always enters FS with >=3 scatters
-                            "scatter_triggers": {3: 8, 4: 2, 5: 1},
+                            "scatter_triggers": {3: 10, 4: 1, 5: 1},
                             "force_wincap": False,
                             "force_freegame": True,
                         },

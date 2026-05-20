@@ -13,6 +13,7 @@
 #   ./scripts/run_optimization.sh
 #   OPT_MODES=base ./scripts/run_optimization.sh
 #   RUST_THREADS=10 OPT_MODES=base ./scripts/run_optimization.sh
+#   OPT_FAST=1 RUST_THREADS=8 OPT_MODES=base ./scripts/run_optimization.sh
 #
 set -euo pipefail
 
