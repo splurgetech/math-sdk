@@ -1,0 +1,14 @@
+# Clash of Kronos
+
+7×7 cluster pays (5+). Hidden cell mults (1×–10×) collect into additive global mult.
+Kronos bar (20 organic win cells) → symbol transform or WD wild.
+
+Symbols: A–G pays, SC scatter, WD wild (Kronos only).
+
+FS: 3→8, 4→10, 5→12 spins; max 5 SC; 3 retrigger cap then FR0_NS strips.
+Bonus buy: 100×, ≥3 SC (weighted toward 3).
+
+RTP target 96–97%, wincap 10,000×.
+
+Fixtures: python run_fixtures.py && python export_storybook_fixtures.py
+Default PAYTABLE_SCALE=0.1 (set env to 1.0 for full design-spec pays).
