@@ -1,6 +1,6 @@
 # Clash of Kronos
 
-6×6 cluster pays (5+). Hidden cell mults (1×–20×, 10–50% of cells, mostly low; 20× very rare) collect into additive global mult.
+6×6 cluster pays (5+). Hidden cell mults (1×–5× / 10× / 20× only, 10–50% of cells) collect into additive global mult.
 Kronos bar (20 organic win cells) → symbol transform or W wild.
 
 Symbols: H1–H3 / L1–L4 pays, S scatter, W wild (Kronos only).

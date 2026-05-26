@@ -12,19 +12,15 @@ HIDDEN_MULT_COVERAGE_MIN = 0.10
 HIDDEN_MULT_COVERAGE_MAX = 0.50
 VISIBLE_CELL_COUNT = 36
 
-# Value weights (sum = 100); many cells, mostly low tiers; 20× very rare
+# Value weights (sum = 100); tiers 1–5× common, 10× / 20× rare spikes only
 HIDDEN_MULT_VALUE_WEIGHTS = {
-    1: 46,
-    2: 26,
-    3: 13,
+    1: 45,
+    2: 25,
+    3: 12,
     4: 5,
     5: 2.5,
-    6: 1.5,
-    7: 0.8,
-    8: 0.5,
-    9: 0.3,
-    10: 0.2,
-    20: 0.2,
+    10: 0.25,
+    20: 0.15,
 }
 
 MAX_SCATTERS_ON_BOARD = 5
