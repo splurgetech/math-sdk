@@ -7,23 +7,24 @@ SYMBOL_WILD = "W"
 KRONOS_BAR_THRESHOLD = 20
 KRONOS_WILD_PROBABILITY = 0.25
 
-# Hidden mult coverage: uniform fraction of grid cells per spin (max half the grid)
+# Hidden mult coverage: uniform fraction of grid cells per spin (min 10% per design)
 HIDDEN_MULT_COVERAGE_MIN = 0.10
-HIDDEN_MULT_COVERAGE_MAX = 0.50
+HIDDEN_MULT_COVERAGE_MAX = 0.28
 VISIBLE_CELL_COUNT = 36
 
-# Value weights (sum = 100); biased to 1×–3×
+# Value weights (sum = 100); fewer cells get mults, but values skew higher (includes 20×)
 HIDDEN_MULT_VALUE_WEIGHTS = {
-    1: 50,
-    2: 28,
-    3: 15,
-    4: 4,
-    5: 1.5,
-    6: 0.8,
-    7: 0.4,
-    8: 0.2,
-    9: 0.05,
-    10: 0.05,
+    1: 18,
+    2: 14,
+    3: 14,
+    4: 12,
+    5: 10,
+    6: 8,
+    7: 7,
+    8: 6,
+    9: 4,
+    10: 4,
+    20: 3,
 }
 
 MAX_SCATTERS_ON_BOARD = 5
