@@ -10,7 +10,7 @@ DEST="$REPO_ROOT/$NUC_GAME_LIB"
 mkdir -p "$DEST"
 
 echo "=== Pulling library artifacts from $NUC_HOST ==="
-nuc_ssh "cd $(nuc_repo_path)/$NUC_GAME_LIB && tar czf - lookup_tables publish_files configs" \
+nuc_ssh "cd $(nuc_repo_path)/$NUC_GAME_LIB && tar czf - lookup_tables publish_files configs forces" \
   | tar xzf - -C "$DEST"
 
 echo "=== Done. Local path: $DEST ==="
