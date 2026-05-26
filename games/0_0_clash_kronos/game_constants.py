@@ -31,5 +31,6 @@ MAX_FS_RETRIGGERS = 3
 
 FREESPIN_TRIGGERS = {3: 8, 4: 10, 5: 12}
 
-# Bonus-buy entry scatter count weights
-BONUS_BUY_SCATTER_WEIGHTS = {3: 70, 4: 20, 5: 10}
+# Forced FS / bonus-buy entry: ~89% ×3, ~10% ×4, ~1% ×5 (5S was 10% — too much RTP)
+FS_ENTRY_SCATTER_WEIGHTS = {3: 89, 4: 10, 5: 1}
+BONUS_BUY_SCATTER_WEIGHTS = FS_ENTRY_SCATTER_WEIGHTS

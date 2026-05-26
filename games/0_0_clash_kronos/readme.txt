@@ -5,7 +5,7 @@ Kronos bar (20 organic win cells) → symbol transform or W wild.
 
 Symbols: H1–H3 / L1–L4 pays, S scatter, W wild (Kronos only).
 
-FS: 3→8, 4→10, 5→12 spins; max 5 SC; 3 retrigger cap then FR0_NS strips.
+FS: 3→8, 4→10, 5→12 spins; forced entry ~89%×3 / 10%×4 / 1%×5; max 5 SC; 3 retrigger cap then FR0_NS.
 Bonus buy: 100×, ≥3 SC (weighted toward 3).
 
 RTP target 96–97%, wincap 10,000×.

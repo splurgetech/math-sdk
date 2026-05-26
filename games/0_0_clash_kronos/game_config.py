@@ -4,6 +4,7 @@ import os
 
 from game_constants import (
     BONUS_BUY_SCATTER_WEIGHTS,
+    FS_ENTRY_SCATTER_WEIGHTS,
     FREESPIN_TRIGGERS,
     KRONOS_BAR_THRESHOLD,
     MAX_FS_RETRIGGERS,
@@ -77,7 +78,7 @@ class GameConfig(Config):
                                 self.basegame_type: {"BR0": 1},
                                 self.freegame_type: {"FR0": 1, "WCAP": 5},
                             },
-                            "scatter_triggers": {3: 1, 4: 1, 5: 1},
+                            "scatter_triggers": FS_ENTRY_SCATTER_WEIGHTS,
                             "force_wincap": True,
                             "force_freegame": True,
                         },
@@ -90,7 +91,7 @@ class GameConfig(Config):
                                 self.basegame_type: {"BR0": 1},
                                 self.freegame_type: {"FR0": 1},
                             },
-                            "scatter_triggers": {3: 5, 4: 2, 5: 1},
+                            "scatter_triggers": FS_ENTRY_SCATTER_WEIGHTS,
                             "force_wincap": False,
                             "force_freegame": True,
                         },
