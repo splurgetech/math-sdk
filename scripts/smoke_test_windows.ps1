@@ -1,8 +1,8 @@
-# Quick sim smoke test for Clash Kronos Cluster on Windows NUC
+# Quick sim smoke test for Clash of Kronos on Windows NUC
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $venvPy = Join-Path $RepoRoot "env\Scripts\python.exe"
-$GameDir = Join-Path $RepoRoot "games\0_0_clash_kronos_cluster"
+$GameDir = Join-Path $RepoRoot "games\0_0_clash_kronos"
 
 if (-not (Test-Path $venvPy)) {
     Write-Host "Run .\scripts\setup_windows.ps1 first." -ForegroundColor Red

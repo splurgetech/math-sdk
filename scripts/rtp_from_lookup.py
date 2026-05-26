@@ -7,8 +7,8 @@ Weighted: distribution from lookUpTable_*_0.csv (weight column), mean return / b
 
 Usage:
   python scripts/rtp_from_lookup.py \\
-    games/0_0_clash_kronos_cluster/library/lookup_tables/lookUpTable_base.csv \\
-    games/0_0_clash_kronos_cluster/library/publish_files/lookUpTable_base_0.csv 1.0
+    games/0_0_clash_kronos/library/lookup_tables/lookUpTable_base.csv \\
+    games/0_0_clash_kronos/library/publish_files/lookUpTable_base_0.csv 1.0
 
   python scripts/rtp_from_lookup.py \\
     .../lookUpTable_bonus.csv .../lookUpTable_bonus_0.csv 100.0
@@ -52,13 +52,13 @@ def main() -> None:
     p.add_argument(
         "unweighted_csv",
         nargs="?",
-        default="games/0_0_clash_kronos_cluster/library/lookup_tables/lookUpTable_base.csv",
+        default="games/0_0_clash_kronos/library/lookup_tables/lookUpTable_base.csv",
         help="Raw lookup (weight column usually 1)",
     )
     p.add_argument(
         "weighted_csv",
         nargs="?",
-        default="games/0_0_clash_kronos_cluster/library/publish_files/lookUpTable_base_0.csv",
+        default="games/0_0_clash_kronos/library/publish_files/lookUpTable_base_0.csv",
         help="Optimized weighted lookup (*_0.csv)",
     )
     p.add_argument(

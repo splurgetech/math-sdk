@@ -17,7 +17,7 @@ def reveal_with_hidden_mults_event(gamestate):
         for row in range(gamestate.config.num_rows[reel]):
             value = gamestate.hidden_mult_grid[reel][row]
             if value > 0:
-                hidden.append({"reel": reel, "row": row, "value": value})
+                hidden.append({"reel": reel, "row": row + 1, "value": value})
     event = {
         "index": len(gamestate.book.events),
         "type": EventConstants.REVEAL.value,
@@ -67,13 +67,14 @@ def kronos_bar_event(gamestate, progress: int, filled: bool = False) -> None:
 
 def kronos_transform_event(gamestate, from_symbol: str, to_symbol: str, positions: list) -> None:
     board_client = padded_client_board(gamestate)
+    client_positions = [{"reel": p["reel"], "row": p["row"] + 1} for p in positions]
     gamestate.book.add_event(
         {
             "index": len(gamestate.book.events),
             "type": KRONOS_TRANSFORM,
             "fromSymbol": from_symbol,
             "toSymbol": to_symbol,
-            "positions": positions,
+            "positions": client_positions,
             "board": board_client,
         }
     )

@@ -4,7 +4,7 @@ set -euo pipefail
 
 NUC_HOST="${NUC_HOST:-nuc}"
 NUC_MATH_SDK="${NUC_MATH_SDK:-math-sdk}"
-NUC_GAME_LIB="games/0_0_clash_kronos_cluster/library"
+NUC_GAME_LIB="games/0_0_clash_kronos/library"
 
 nuc_ssh() {
   ssh -o BatchMode=yes -o ConnectTimeout=15 "$NUC_HOST" "$@"

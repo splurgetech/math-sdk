@@ -96,7 +96,7 @@ tail -f ~/nuc-sim.log
 
 NUC optimization is optional (`./scripts/run_optimization_on_nuc.sh`) if MSVC Build Tools are installed.
 
-`run.py` env flags (from `games/0_0_clash_kronos_cluster/`):
+`run.py` env flags (from `games/0_0_clash_kronos/`):
 
 | Env | Effect |
 |-----|--------|
@@ -121,7 +121,7 @@ RUN_OPTIMIZATION=1 RUN_ANALYSIS=1 SIM_BASE=100000 SIM_BONUS=30000 python run.py
 | Item | Path |
 |------|------|
 | Repo | `C:\Users\evanl\math-sdk` |
-| Sim output | `games\0_0_clash_kronos_cluster\library\` |
+| Sim output | `games\0_0_clash_kronos\library\` |
 | Lookup tables | `library\lookup_tables\` |
 | Publish (books/LUT) | `library\publish_files\` |
 

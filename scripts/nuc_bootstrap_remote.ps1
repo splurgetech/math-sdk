@@ -11,7 +11,7 @@ if (-not (Test-Path $repo)) {
     git checkout $branch
 } else {
     $bak = Join-Path $HOME "math-sdk-library-backup"
-    $lib = Join-Path $repo "games\0_0_clash_kronos_cluster\library"
+    $lib = Join-Path $repo "games\0_0_clash_kronos\library"
     if (Test-Path $lib) {
         Write-Host "Backing up library to $bak"
         Remove-Item -Recurse -Force $bak -ErrorAction SilentlyContinue
@@ -26,7 +26,7 @@ if (-not (Test-Path $repo)) {
 
 $bak = Join-Path $HOME "math-sdk-library-backup"
 if (Test-Path $bak) {
-    $libNew = Join-Path $repo "games\0_0_clash_kronos_cluster\library"
+    $libNew = Join-Path $repo "games\0_0_clash_kronos\library"
     New-Item -ItemType Directory -Force -Path $libNew | Out-Null
     Copy-Item -Recurse -Force "$bak\*" $libNew\
 }

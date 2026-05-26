@@ -45,7 +45,7 @@ def collect_from_wins(
             value = hidden_grid[reel][row]
             if value <= 0:
                 continue
-            collected.append({"reel": reel, "row": row, "value": value})
+            collected.append({"reel": reel, "row": row + 1, "value": value})
             total_added += value
             hidden_grid[reel][row] = 0
     return collected, total_added

@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repo = Split-Path -Parent $PSScriptRoot
-$gameDir = Join-Path $repo "games\0_0_clash_kronos_cluster"
+$gameDir = Join-Path $repo "games\0_0_clash_kronos"
 $py = Join-Path $repo "env\Scripts\python.exe"
 
 # MSVC link.exe required for `cargo run --release` (non-interactive SSH has no Developer shell PATH).

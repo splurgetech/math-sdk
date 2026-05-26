@@ -19,8 +19,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-GAME_DIR="$REPO_ROOT/games/0_0_clash_kronos_cluster"
-GAME_ID="0_0_clash_kronos_cluster"
+GAME_DIR="$REPO_ROOT/games/0_0_clash_kronos"
+GAME_ID="0_0_clash_kronos"
 
 if [[ -f "$HOME/.cargo/env" ]]; then
   # shellcheck source=/dev/null

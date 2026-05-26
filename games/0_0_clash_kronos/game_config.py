@@ -32,12 +32,12 @@ class GameConfig(Config):
         self.rtp = 0.965
         self.construct_paths()
 
-        self.num_reels = 7
-        self.num_rows = [7] * self.num_reels
+        self.num_reels = 6
+        self.num_rows = [6] * self.num_reels
         self.paytable = build_paytable()
 
         self.include_padding = True
-        self.special_symbols = {"wild": ["WD"], "scatter": ["SC"]}
+        self.special_symbols = {"wild": ["W"], "scatter": ["S"]}
 
         self.freespin_triggers = {
             self.basegame_type: dict(FREESPIN_TRIGGERS),

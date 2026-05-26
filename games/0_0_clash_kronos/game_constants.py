@@ -1,8 +1,8 @@
 """Clash of Kronos — tunable constants."""
 
-PAYING_SYMBOLS = ("A", "B", "C", "D", "E", "F", "G")
-SYMBOL_SCATTER = "SC"
-SYMBOL_WILD = "WD"
+PAYING_SYMBOLS = ("H1", "H2", "H3", "L1", "L2", "L3", "L4")
+SYMBOL_SCATTER = "S"
+SYMBOL_WILD = "W"
 
 KRONOS_BAR_THRESHOLD = 20
 KRONOS_WILD_PROBABILITY = 0.25
@@ -10,7 +10,7 @@ KRONOS_WILD_PROBABILITY = 0.25
 # Hidden mult coverage: uniform fraction of grid cells per spin
 HIDDEN_MULT_COVERAGE_MIN = 0.20
 HIDDEN_MULT_COVERAGE_MAX = 0.80
-VISIBLE_CELL_COUNT = 49
+VISIBLE_CELL_COUNT = 36
 
 # Value weights (sum = 100)
 HIDDEN_MULT_VALUE_WEIGHTS = {

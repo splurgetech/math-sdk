@@ -2,7 +2,7 @@ from game_override import GameStateOverride
 
 
 class GameState(GameStateOverride):
-    """7×7 cluster — hidden mults, global mult, Kronos transform."""
+    """6×6 cluster — hidden mults, global mult, Kronos transform."""
 
     def run_spin(self, sim, simulation_seed=None):
         self.reset_seed(sim)

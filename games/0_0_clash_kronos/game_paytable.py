@@ -11,7 +11,7 @@ PAYTABLE_SCALE = float(os.environ.get("PAYTABLE_SCALE", "0.1"))
 def _tier_pay_groups(values: tuple) -> list[tuple[tuple[int, int], float]]:
     sizes = [5, 6, 7, 8, 9, 10]
     groups = [((size, size), pay) for size, pay in zip(sizes, values[:-1])]
-    groups.append(((11, 49), values[-1]))
+    groups.append(((11, 36), values[-1]))
     return groups
 
 
@@ -21,13 +21,13 @@ FAN = (1.00, 2.00, 4.00, 8.00, 15.00, 30.00, 50.00)
 HELMET = (2.00, 4.00, 8.00, 15.00, 30.00, 60.00, 100.00)
 
 SYMBOL_TIERS = {
-    "A": GEM,
-    "B": GEM,
-    "C": GEM,
-    "D": SCROLL,
-    "E": FAN,
-    "F": FAN,
-    "G": HELMET,
+    "L4": GEM,
+    "L3": GEM,
+    "L2": GEM,
+    "L1": SCROLL,
+    "H3": FAN,
+    "H2": FAN,
+    "H1": HELMET,
 }
 
 
