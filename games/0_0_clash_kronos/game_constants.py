@@ -4,7 +4,7 @@ PAYING_SYMBOLS = ("H1", "H2", "H3", "L1", "L2", "L3", "L4")
 SYMBOL_SCATTER = "S"
 SYMBOL_WILD = "W"
 
-KRONOS_BAR_THRESHOLD = 22
+KRONOS_BAR_THRESHOLD = 20
 KRONOS_WILD_PROBABILITY = 0.25
 
 # Hidden mult coverage: uniform fraction of grid cells per spin (max half the grid)
