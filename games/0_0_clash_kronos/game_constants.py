@@ -9,7 +9,7 @@ KRONOS_WILD_PROBABILITY = 0.25
 
 # Hidden mult coverage: uniform fraction of grid cells per spin (min 10% per design)
 HIDDEN_MULT_COVERAGE_MIN = 0.10
-HIDDEN_MULT_COVERAGE_MAX = 0.50
+HIDDEN_MULT_COVERAGE_MAX = 0.55
 VISIBLE_CELL_COUNT = 36
 
 # Value weights (sum = 100); tiers 1–5× common, 10× / 20× rare spikes only
