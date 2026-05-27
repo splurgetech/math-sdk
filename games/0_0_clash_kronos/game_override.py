@@ -25,7 +25,11 @@ class GameStateOverride(GameExecutables):
         self.global_multiplier = 0
         self.fs_retrigger_count = 0
         self.reset_hidden_mults()
+
+    def update_freespin(self) -> None:
+        """Each FS spin starts with an empty Kronos bar (same as base spins)."""
         self.reset_kronos_bar()
+        super().update_freespin()
 
     def assign_special_sym_function(self):
         pass
@@ -34,6 +38,12 @@ class GameStateOverride(GameExecutables):
         n = self.count_special_symbols("scatter")
         if n not in self.config.freespin_triggers[self.gametype]:
             n = min(n, max(self.config.freespin_triggers[self.gametype].keys()))
+        return n
+
+    def _scatter_count_for_retrigger(self) -> int:
+        n = self.count_special_symbols("scatter")
+        if n not in self.config.freespin_retriggers[self.gametype]:
+            n = min(n, max(self.config.freespin_retriggers[self.gametype].keys()))
         return n
 
     def update_freespin_amount(self, scatter_key: str = "scatter") -> None:
@@ -56,20 +66,27 @@ class GameStateOverride(GameExecutables):
         if self.fs_retrigger_count >= MAX_FS_RETRIGGERS:
             return
         self.fs_retrigger_count += 1
-        n = self._scatter_count_for_trigger()
-        self.tot_fs += self.config.freespin_triggers[self.gametype][n]
+        n = self._scatter_count_for_retrigger()
+        self.tot_fs += self.config.freespin_retriggers[self.gametype][n]
         fs_trigger_event(self, freegame_trigger=True, basegame_trigger=False)
+
+    def _no_scatter_fs_reel_id(self) -> str:
+        """After max retriggers, use buy-specific strips in bonus buy mode."""
+        if self.betmode == "bonus" and "FR0_BUY_NS" in self.config.reels:
+            return "FR0_BUY_NS"
+        return "FR0_NS"
 
     def create_board_reelstrips(self) -> None:
         conditions = self.get_current_distribution_conditions()
         reel_weights = conditions["reel_weights"]
+        ns_reel = self._no_scatter_fs_reel_id()
         if (
             self.gametype == self.config.freegame_type
             and self.fs_retrigger_count >= MAX_FS_RETRIGGERS
-            and "FR0_NS" in self.config.reels
+            and ns_reel in self.config.reels
         ):
             saved = deepcopy(reel_weights[self.gametype])
-            reel_weights[self.gametype] = {"FR0_NS": 1}
+            reel_weights[self.gametype] = {ns_reel: 1}
             super().create_board_reelstrips()
             reel_weights[self.gametype] = saved
         else:

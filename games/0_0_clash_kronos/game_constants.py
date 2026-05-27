@@ -1,6 +1,11 @@
 """Clash of Kronos — tunable constants."""
 
+import os
+
 PAYING_SYMBOLS = ("H1", "H2", "H3", "L1", "L2", "L3", "L4")
+
+# Cluster pays on base bet mode only (1× + triggered FS). Bonus buy uses scale 1.0.
+BASE_PAYTABLE_SCALE = float(os.environ.get("BASE_PAYTABLE_SCALE", "1.285"))
 SYMBOL_SCATTER = "S"
 SYMBOL_WILD = "W"
 
@@ -27,6 +32,9 @@ MAX_SCATTERS_ON_BOARD = 5
 MAX_FS_RETRIGGERS = 3
 
 FREESPIN_TRIGGERS = {3: 8, 4: 10, 5: 12}
+
+# Retrigger awards = 50% of initial (added spins per retrigger; max 3 retriggers per bonus)
+FREESPIN_RETRIGGER_AWARDS = {3: 4, 4: 5, 5: 6}
 
 # Forced FS / bonus-buy entry: ~89% ×3, ~10% ×4, ~1% ×5 (5S was 10% — too much RTP)
 FS_ENTRY_SCATTER_WEIGHTS = {3: 89, 4: 10, 5: 1}

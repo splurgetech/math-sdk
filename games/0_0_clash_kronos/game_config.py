@@ -5,6 +5,7 @@ import os
 from game_constants import (
     BONUS_BUY_SCATTER_WEIGHTS,
     FS_ENTRY_SCATTER_WEIGHTS,
+    FREESPIN_RETRIGGER_AWARDS,
     FREESPIN_TRIGGERS,
     KRONOS_BAR_THRESHOLD,
     MAX_FS_RETRIGGERS,
@@ -44,6 +45,10 @@ class GameConfig(Config):
             self.basegame_type: dict(FREESPIN_TRIGGERS),
             self.freegame_type: dict(FREESPIN_TRIGGERS),
         }
+        self.freespin_retriggers = {
+            self.basegame_type: dict(FREESPIN_RETRIGGER_AWARDS),
+            self.freegame_type: dict(FREESPIN_RETRIGGER_AWARDS),
+        }
         self.anticipation_triggers = {
             self.basegame_type: min(self.freespin_triggers[self.basegame_type].keys()) - 1,
             self.freegame_type: min(self.freespin_triggers[self.freegame_type].keys()) - 1,
@@ -52,7 +57,14 @@ class GameConfig(Config):
         self.kronos_bar_threshold = KRONOS_BAR_THRESHOLD
         self.max_fs_retriggers = MAX_FS_RETRIGGERS
 
-        reels = {"BR0": "BR0.csv", "FR0": "FR0.csv", "FR0_NS": "FR0_NS.csv", "WCAP": "WCAP.csv"}
+        reels = {
+            "BR0": "BR0.csv",
+            "FR0": "FR0.csv",
+            "FR0_NS": "FR0_NS.csv",
+            "FR0_BUY": "FR0_BUY.csv",
+            "FR0_BUY_NS": "FR0_BUY_NS.csv",
+            "WCAP": "WCAP.csv",
+        }
         self.reels = {}
         for r, f in reels.items():
             self.reels[r] = self.read_reels_csv(os.path.join(self.reels_path, f))
@@ -85,7 +97,7 @@ class GameConfig(Config):
                     ),
                     Distribution(
                         criteria="freegame",
-                        quota=0.1,
+                        quota=0.15,
                         conditions={
                             "reel_weights": {
                                 self.basegame_type: {"BR0": 1},
@@ -98,7 +110,7 @@ class GameConfig(Config):
                     ),
                     Distribution(
                         criteria="0",
-                        quota=0.4,
+                        quota=0.10,
                         win_criteria=0.0,
                         conditions={
                             "reel_weights": {self.basegame_type: {"BR0": 1}},
@@ -108,7 +120,7 @@ class GameConfig(Config):
                     ),
                     Distribution(
                         criteria="basegame",
-                        quota=0.5,
+                        quota=0.749,
                         conditions={
                             "reel_weights": {self.basegame_type: {"BR0": 1}},
                             "force_wincap": False,
@@ -132,7 +144,7 @@ class GameConfig(Config):
                         conditions={
                             "reel_weights": {
                                 self.basegame_type: {"BR0": 1},
-                                self.freegame_type: {"FR0": 1},
+                                self.freegame_type: {"FR0_BUY": 1},
                             },
                             "scatter_triggers": BONUS_BUY_SCATTER_WEIGHTS,
                             "force_wincap": False,

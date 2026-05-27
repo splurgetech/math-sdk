@@ -1,3 +1,4 @@
+from game_constants import BASE_PAYTABLE_SCALE
 from src.executables.executables import Executables
 from src.calculations.cluster import Cluster
 from src.calculations.board import Board
@@ -6,6 +7,11 @@ from src.config.config import Config
 
 class GameCalculations(Executables):
     """Cluster evaluation using global multiplier only (no per-cell mult on wins)."""
+
+    def _cluster_pay_scale(self) -> float:
+        if self.betmode == "bonus":
+            return 1.0
+        return BASE_PAYTABLE_SCALE
 
     def evaluate_clusters_global(
         self,
@@ -26,7 +32,7 @@ class GameCalculations(Executables):
                 syms_in_cluster = len(cluster)
                 if (syms_in_cluster, sym) not in config.paytable:
                     continue
-                sym_win = config.paytable[(syms_in_cluster, sym)]
+                sym_win = config.paytable[(syms_in_cluster, sym)] * self._cluster_pay_scale()
                 symwin_mult = sym_win * mult_factor
                 total_win += symwin_mult
                 json_positions = [{"reel": p[0], "row": p[1]} for p in cluster]
