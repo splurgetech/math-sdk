@@ -11,5 +11,5 @@ Bonus buy: 100×, ≥3 SC (weighted toward 3); FS reels FR0_BUY / FR0_BUY_NS (ta
 RTP target 96–97%, wincap 10,000×.
 
 Fixtures: python run_fixtures.py && python export_storybook_fixtures.py
-Default PAYTABLE_SCALE=0.1 (set env to 1.0 for full design-spec pays).
-BASE_PAYTABLE_SCALE (default 1.27) applies to base bet mode only; bonus buy uses 1.0.
+Default PAYTABLE_SCALE=0.1 (set env to 1.0 for full design-spec pays). Same cluster pays in base and bonus buy.
+Base spins use cluster-tuned BR0 (python build_br0_clusters.py): longer symbol runs, mild premium lift — not used for buy FS (FR0_BUY).

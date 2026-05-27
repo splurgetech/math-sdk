@@ -1,11 +1,6 @@
 """Clash of Kronos — tunable constants."""
 
-import os
-
 PAYING_SYMBOLS = ("H1", "H2", "H3", "L1", "L2", "L3", "L4")
-
-# Cluster pays on base bet mode only (1× + triggered FS). Bonus buy uses scale 1.0.
-BASE_PAYTABLE_SCALE = float(os.environ.get("BASE_PAYTABLE_SCALE", "1.285"))
 SYMBOL_SCATTER = "S"
 SYMBOL_WILD = "W"
 
