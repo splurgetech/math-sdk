@@ -71,6 +71,15 @@ class GameConfig(Config):
 
         mode_maxwins = {"base": 10000, "bonus": 10000}
 
+        wincap_quota = 0.001
+        dist_fg = float(os.environ.get("DIST_FG_QUOTA", "0.08"))
+        dist_zero = float(os.environ.get("DIST_ZERO_QUOTA", "0.10"))
+        dist_base = 1.0 - wincap_quota - dist_fg - dist_zero
+        if dist_base <= 0:
+            raise ValueError(
+                f"Invalid distribution quotas: fg={dist_fg} zero={dist_zero} wincap={wincap_quota}"
+            )
+
         self.bet_modes = [
             BetMode(
                 name="base",
@@ -83,7 +92,7 @@ class GameConfig(Config):
                 distributions=[
                     Distribution(
                         criteria="wincap",
-                        quota=0.001,
+                        quota=wincap_quota,
                         win_criteria=mode_maxwins["base"],
                         conditions={
                             "reel_weights": {
@@ -97,7 +106,7 @@ class GameConfig(Config):
                     ),
                     Distribution(
                         criteria="freegame",
-                        quota=0.15,
+                        quota=dist_fg,
                         conditions={
                             "reel_weights": {
                                 self.basegame_type: {"BR0": 1},
@@ -110,7 +119,7 @@ class GameConfig(Config):
                     ),
                     Distribution(
                         criteria="0",
-                        quota=0.10,
+                        quota=dist_zero,
                         win_criteria=0.0,
                         conditions={
                             "reel_weights": {self.basegame_type: {"BR0": 1}},
@@ -120,7 +129,7 @@ class GameConfig(Config):
                     ),
                     Distribution(
                         criteria="basegame",
-                        quota=0.749,
+                        quota=dist_base,
                         conditions={
                             "reel_weights": {self.basegame_type: {"BR0": 1}},
                             "force_wincap": False,

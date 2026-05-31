@@ -1,11 +1,14 @@
 """Clash of Kronos — tunable constants."""
 
+import os
+
 PAYING_SYMBOLS = ("H1", "H2", "H3", "L1", "L2", "L3", "L4")
 SYMBOL_SCATTER = "S"
 SYMBOL_WILD = "W"
 
-KRONOS_BAR_THRESHOLD = 20
-KRONOS_WILD_PROBABILITY = 0.25
+# Empty env (e.g. sweep unsets KRONOS_*) must fall back to defaults — os.environ.get("X", "20") does not.
+KRONOS_BAR_THRESHOLD = int(os.environ.get("KRONOS_BAR_THRESHOLD") or "20")
+KRONOS_WILD_PROBABILITY = float(os.environ.get("KRONOS_WILD_PROB") or "0.25")
 
 # Hidden mult coverage: uniform fraction of grid cells per spin (min 10% per design)
 HIDDEN_MULT_COVERAGE_MIN = 0.10

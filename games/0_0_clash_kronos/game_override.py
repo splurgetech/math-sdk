@@ -11,7 +11,21 @@ from src.calculations.statistics import get_random_outcome
 from src.events.events import fs_trigger_event
 
 
+def _stake_cents(payout_multiplier: float) -> int:
+    """RGS lookup/books use payoutMultiplier in cents; must be a multiple of 10."""
+    cents = int(round(payout_multiplier * 100))
+    return (cents // 10) * 10
+
+
 class GameStateOverride(GameExecutables):
+    def update_final_win(self) -> None:
+        super().update_final_win()
+        cents = _stake_cents(self.book.payout_multiplier)
+        self.final_win = cents / 100.0
+        self.book.payout_multiplier = self.final_win
+        if round(self.book.basegame_wins + self.book.freegame_wins, 2) != self.final_win:
+            self.book.freegame_wins = round(self.final_win - self.book.basegame_wins, 2)
+
     def reset_book(self):
         super().reset_book()
         self.global_multiplier = 0

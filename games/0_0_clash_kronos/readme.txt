@@ -11,5 +11,8 @@ Bonus buy: 100×, ≥3 SC (weighted toward 3); FS reels FR0_BUY / FR0_BUY_NS (ta
 RTP target 96–97%, wincap 10,000×.
 
 Fixtures: python run_fixtures.py && python export_storybook_fixtures.py
-Default PAYTABLE_SCALE=0.1 (set env to 1.0 for full design-spec pays). Same cluster pays in base and bonus buy.
-Base spins use cluster-tuned BR0 (python build_br0_clusters.py): longer symbol runs, mild premium lift — not used for buy FS (FR0_BUY).
+Production sims: PAYTABLE_SCALE=1.0 on NUC (`./scripts/run_sims_on_nuc.sh` or `tune_clash_kronos.sh`).
+Same cluster pays in base and bonus buy (shared paytable; buy uses FR0_BUY strips only).
+Distribution quotas (env): DIST_FG_QUOTA default 0.08, DIST_ZERO_QUOTA default 0.10, wincap 0.001.
+Tuning log: library/tuning_log.csv — target publish 96.5%, raw pool ~0.90–1.05×, zero-weight < ~50%.
+Payouts rounded to 0.1× (10¢ steps) for Stake RGS upload.

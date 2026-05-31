@@ -352,7 +352,9 @@ fn print_information(
                 let mut file = BufWriter::new(File::create(file_path).unwrap());
                 for index in &sorted_indexes {
                     let entry = lookup_table.get(index).unwrap();
-                    let rounded_win = (entry.win * 100.0).round(); //format!("{:.2}", entry.win);
+                    // Stake RGS: payout column is cents, must be a multiple of 10.
+                    let cents = (entry.win * 100.0).round() as i64;
+                    let rounded_win = (cents / 10) * 10;
                     write!(file, "{},{},{}\n", entry.id, entry.weight, rounded_win as u64)
                         .expect("Failed to write to file");
                 }
