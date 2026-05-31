@@ -34,15 +34,22 @@ $StatusFile = Join-Path $LibDir ".sim_status"
 $LogFile = Join-Path $LibDir ".sim_run.log"
 $SimScript = Join-Path $PSScriptRoot "run_clash_kronos_sims.ps1"
 
-$argList = @(
-    "-SimBase", $SimBase, "-SimBonus", $SimBonus,
-    "-PaytableScale", $PaytableScale,
-    "-DistFgQuota", $DistFgQuota, "-DistZeroQuota", $DistZeroQuota,
-    "-KronosWildProb", $KronosWildProb, "-KronosBarThreshold", $KronosBarThreshold,
-    "-HiddenMultCoverageMax", $HiddenMultCoverageMax, "-HiddenMultSpikeMult", $HiddenMultSpikeMult,
-    "-MaxWin", $MaxWin, "-MaxGlobalMult", $MaxGlobalMult,
-    "-SimThreads", $SimThreads
-)
+# Ordered list of param name/value pairs, used to (a) build the spawn command line and
+# (b) build a hashtable for name-based splatting into the sim script.
+$argPairs = [ordered]@{
+    SimBase               = $SimBase
+    SimBonus              = $SimBonus
+    PaytableScale         = $PaytableScale
+    DistFgQuota           = $DistFgQuota
+    DistZeroQuota         = $DistZeroQuota
+    KronosWildProb        = $KronosWildProb
+    KronosBarThreshold    = $KronosBarThreshold
+    HiddenMultCoverageMax = $HiddenMultCoverageMax
+    HiddenMultSpikeMult   = $HiddenMultSpikeMult
+    MaxWin                = $MaxWin
+    MaxGlobalMult         = $MaxGlobalMult
+    SimThreads            = $SimThreads
+}
 
 if (-not (Test-Path $LibDir)) { New-Item -ItemType Directory -Path $LibDir -Force | Out-Null }
 
@@ -61,7 +68,7 @@ if (-not $Worker) {
     # Spawn the worker via Win32_Process.Create so it is NOT a child of the sshd
     # session and survives SSH disconnect / Mac sleep (Start-Process gets reaped on logoff).
     $self = $MyInvocation.MyCommand.Path
-    $argStr = ($argList | ForEach-Object { "$_" }) -join " "
+    $argStr = (($argPairs.GetEnumerator() | ForEach-Object { "-$($_.Key) $($_.Value)" }) -join " ")
     $cmd = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$self`" -Worker $argStr"
     $res = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = $cmd; CurrentDirectory = $RepoRoot }
     if ($res.ReturnValue -ne 0 -or -not $res.ProcessId) {
@@ -77,7 +84,9 @@ if (-not $Worker) {
 try {
     Set-Location $RepoRoot
     ("=== worker start $(Get-Date -Format o) pid $PID ===") | Out-File -FilePath $LogFile -Append -Encoding ascii
-    & $SimScript @argList *>> $LogFile
+    $simParams = @{}
+    foreach ($kv in $argPairs.GetEnumerator()) { $simParams[$kv.Key] = $kv.Value }
+    & $SimScript @simParams *>> $LogFile
     $code = $LASTEXITCODE
     if ($null -eq $code) { $code = 0 }
     if ($code -eq 0) {
