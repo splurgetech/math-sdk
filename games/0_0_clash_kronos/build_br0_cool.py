@@ -9,6 +9,7 @@ Inverse of half-strength build_br0_clusters.py. Start from git stock BR0.
 from __future__ import annotations
 
 import csv
+import os
 import random
 import subprocess
 from pathlib import Path
@@ -17,15 +18,21 @@ REELS_DIR = Path(__file__).resolve().parent / "reels"
 BR0_PATH = REELS_DIR / "BR0.csv"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
-RUN_EXTEND_PROB = 0.07
+_STRONG = os.environ.get("BR0_COOL_STRONG", "").strip() in ("1", "true", "yes")
+RUN_EXTEND_PROB = 0.04 if _STRONG else 0.07
 # Demote premiums (reverse of cluster builder promote, ~half rates).
-DEMOTE = (
+_DEMOTE_BASE = (
     ("H1", "H2", 0.01),
     ("H2", "H3", 0.015),
     ("H3", "L1", 0.02),
     ("L1", "L2", 0.025),
     ("L2", "L3", 0.03),
     ("L3", "L4", 0.03),
+)
+DEMOTE = (
+    tuple((a, b, p * 2.0 if _STRONG else p) for a, b, p in _DEMOTE_BASE)
+    if _STRONG
+    else _DEMOTE_BASE
 )
 
 
@@ -98,7 +105,8 @@ def main() -> None:
 
     out = transform_rows(rows)
     write_csv(BR0_PATH, out)
-    print(f"Wrote {BR0_PATH} ({len(out)} rows, mild cool base strips)")
+    mode = "strong cool" if _STRONG else "mild cool"
+    print(f"Wrote {BR0_PATH} ({len(out)} rows, {mode} base strips)")
 
 
 if __name__ == "__main__":

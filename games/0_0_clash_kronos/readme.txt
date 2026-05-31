@@ -14,5 +14,6 @@ Fixtures: python run_fixtures.py && python export_storybook_fixtures.py
 Production sims: PAYTABLE_SCALE=1.0 on NUC (`./scripts/run_sims_on_nuc.sh` or `tune_clash_kronos.sh`).
 Same cluster pays in base and bonus buy (shared paytable; buy uses FR0_BUY strips only).
 Distribution quotas (env): DIST_FG_QUOTA default 0.08, DIST_ZERO_QUOTA default 0.10, wincap 0.001.
+Bundle B (aggressive raw cut): ./scripts/bundle_b_tune.sh — 30% zero / 6% FG, PAYTABLE_SCALE=0.8 + caps, strong cool BR0, feature cool-down.
 Tuning log: library/tuning_log.csv — target publish 96.5%, raw pool ~0.90–1.05×, zero-weight < ~50%.
 Payouts rounded to 0.1× (10¢ steps) for Stake RGS upload.

@@ -7,6 +7,17 @@ from game_constants import PAYING_SYMBOLS
 # Tune via env; default 0.1× design spec for sim/Storybook-friendly wins (target RTP via reels/weights).
 PAYTABLE_SCALE = float(os.environ.get("PAYTABLE_SCALE", "0.1"))
 
+# Final pay caps (bet multipliers) — cluster-sample-aligned; applied after PAYTABLE_SCALE.
+PAYTABLE_SYMBOL_CAPS = {
+    "H1": float(os.environ.get("PAYTABLE_CAP_H1", "60")),
+    "H2": float(os.environ.get("PAYTABLE_CAP_H2", "40")),
+    "H3": float(os.environ.get("PAYTABLE_CAP_H3", "30")),
+    "L1": float(os.environ.get("PAYTABLE_CAP_L1", "10")),
+    "L2": float(os.environ.get("PAYTABLE_CAP_L2", "8")),
+    "L3": float(os.environ.get("PAYTABLE_CAP_L3", "5")),
+    "L4": float(os.environ.get("PAYTABLE_CAP_L4", "4")),
+}
+
 
 def _tier_pay_groups(values: tuple) -> list[tuple[tuple[int, int], float]]:
     sizes = [5, 6, 7, 8, 9, 10]
@@ -37,5 +48,9 @@ def build_paytable() -> dict:
         for (rng, pay) in _tier_pay_groups(SYMBOL_TIERS[sym]):
             lo, hi = rng
             for size in range(lo, hi + 1):
-                paytable[(size, sym)] = round(pay * PAYTABLE_SCALE, 6)
+                scaled = pay * PAYTABLE_SCALE
+                cap = PAYTABLE_SYMBOL_CAPS.get(sym)
+                if cap is not None:
+                    scaled = min(scaled, cap)
+                paytable[(size, sym)] = round(scaled, 6)
     return paytable

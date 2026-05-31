@@ -12,6 +12,8 @@ param(
     [string]$DistZeroQuota = "",
     [string]$KronosWildProb = "",
     [string]$KronosBarThreshold = "",
+    [string]$HiddenMultCoverageMax = "",
+    [string]$HiddenMultSpikeMult = "",
     [int]$SimThreads = 0,
     [switch]$UncappedFs
 )
@@ -37,6 +39,8 @@ if ($DistFgQuota) { $env:DIST_FG_QUOTA = $DistFgQuota }
 if ($DistZeroQuota) { $env:DIST_ZERO_QUOTA = $DistZeroQuota }
 if ($KronosWildProb) { $env:KRONOS_WILD_PROB = $KronosWildProb }
 if ($KronosBarThreshold) { $env:KRONOS_BAR_THRESHOLD = $KronosBarThreshold }
+if ($HiddenMultCoverageMax) { $env:HIDDEN_MULT_COVERAGE_MAX = $HiddenMultCoverageMax }
+if ($HiddenMultSpikeMult) { $env:HIDDEN_MULT_SPIKE_MULT = $HiddenMultSpikeMult }
 if ($UncappedFs) { $env:KRONOS_UNCAPPED_FS = "1" } else { Remove-Item Env:KRONOS_UNCAPPED_FS -ErrorAction SilentlyContinue }
 
 if ($SimThreads -gt 0) {

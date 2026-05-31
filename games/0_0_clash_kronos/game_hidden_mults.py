@@ -5,14 +5,14 @@ import random
 from game_constants import (
     HIDDEN_MULT_COVERAGE_MAX,
     HIDDEN_MULT_COVERAGE_MIN,
-    HIDDEN_MULT_VALUE_WEIGHTS,
     VISIBLE_CELL_COUNT,
+    hidden_mult_value_weights,
 )
 from src.calculations.statistics import get_random_outcome
 
 
 def _weighted_hidden_value() -> int:
-    return int(get_random_outcome(HIDDEN_MULT_VALUE_WEIGHTS))
+    return int(get_random_outcome(hidden_mult_value_weights()))
 
 
 def assign_hidden_mults(num_reels: int, num_rows: list) -> list[list[int]]:

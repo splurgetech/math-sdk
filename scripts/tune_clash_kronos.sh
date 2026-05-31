@@ -28,6 +28,8 @@ export DIST_ZERO_QUOTA="${DIST_ZERO_QUOTA:-0.10}"
 # Do not export empty KRONOS_* — breaks game_constants int()/float() on Mac opt.
 [[ -n "${KRONOS_WILD_PROB:-}" ]] && export KRONOS_WILD_PROB
 [[ -n "${KRONOS_BAR_THRESHOLD:-}" ]] && export KRONOS_BAR_THRESHOLD
+[[ -n "${HIDDEN_MULT_COVERAGE_MAX:-}" ]] && export HIDDEN_MULT_COVERAGE_MAX
+[[ -n "${HIDDEN_MULT_SPIKE_MULT:-}" ]] && export HIDDEN_MULT_SPIKE_MULT
 [[ -n "${BR0_VARIANT:-}" ]] && export BR0_VARIANT
 
 SIM_BASE="${SIM_BASE:-150000}"
@@ -52,6 +54,8 @@ run_one() {
     local ps_args="-SimBase $SIM_BASE -SimBonus $SIM_BONUS -PaytableScale $PAYTABLE_SCALE -DistFgQuota $DIST_FG_QUOTA -DistZeroQuota $DIST_ZERO_QUOTA -SimThreads $SIM_THREADS"
     [[ -n "${KRONOS_WILD_PROB:-}" ]] && ps_args="$ps_args -KronosWildProb $KRONOS_WILD_PROB"
     [[ -n "${KRONOS_BAR_THRESHOLD:-}" ]] && ps_args="$ps_args -KronosBarThreshold $KRONOS_BAR_THRESHOLD"
+    [[ -n "${HIDDEN_MULT_COVERAGE_MAX:-}" ]] && ps_args="$ps_args -HiddenMultCoverageMax $HIDDEN_MULT_COVERAGE_MAX"
+    [[ -n "${HIDDEN_MULT_SPIKE_MULT:-}" ]] && ps_args="$ps_args -HiddenMultSpikeMult $HIDDEN_MULT_SPIKE_MULT"
     nuc_ssh "cd $(nuc_repo_path) && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_clash_kronos_sims.ps1 $ps_args"
     "$SCRIPT_DIR/pull_library_from_nuc.sh"
   fi
