@@ -18,7 +18,7 @@ export TUNING_LOG="$GAME_DIR/library/tuning_log.csv"
 export PAYTABLE_SCALE="${PAYTABLE_SCALE:-1.0}"
 export SIM_BASE="${SIM_BASE:-150000}"
 export SIM_BONUS="${SIM_BONUS:-20000}"
-export SIM_THREADS="${SIM_THREADS:-4}"
+export SIM_THREADS="${SIM_THREADS:-10}"
 
 log() { echo "[$(date +%H:%M:%S)] $*" | tee -a "$LOG"; }
 

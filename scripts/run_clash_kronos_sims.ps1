@@ -42,12 +42,7 @@ if ($UncappedFs) { $env:KRONOS_UNCAPPED_FS = "1" } else { Remove-Item Env:KRONOS
 if ($SimThreads -gt 0) {
     $env:SIM_THREADS = "$SimThreads"
 } elseif (-not $env:SIM_THREADS) {
-  # Windows spawn multiprocessing is flaky at 10 workers; 4 is reliable on the NUC.
-    if ($IsWindows -or $env:OS -match "Windows") {
-        $env:SIM_THREADS = "4"
-    } else {
-        $env:SIM_THREADS = "10"
-    }
+    $env:SIM_THREADS = "10"
 }
 $env:PYTHONUNBUFFERED = "1"
 $env:RUN_SIMS = "1"

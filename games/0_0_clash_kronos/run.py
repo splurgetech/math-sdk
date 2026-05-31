@@ -47,10 +47,7 @@ if __name__ == "__main__":
 
     multiprocessing.freeze_support()
 
-    import platform
-
-    default_threads = "4" if platform.system() == "Windows" else "10"
-    num_threads = int(os.environ.get("SIM_THREADS", default_threads))
+    num_threads = int(os.environ.get("SIM_THREADS", "10"))
     rust_threads = int(os.environ.get("RUST_THREADS", "20"))
     batching_size = 50000
     compression = True

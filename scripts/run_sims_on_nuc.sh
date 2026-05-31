@@ -15,7 +15,7 @@ source "$SCRIPT_DIR/nuc_common.sh"
 SIM_BASE="${1:-150000}"
 SIM_BONUS="${2:-0}"
 PAYTABLE_SCALE="${3:-1.0}"
-SIM_THREADS="${SIM_THREADS:-4}"
+SIM_THREADS="${SIM_THREADS:-10}"
 
 "$SCRIPT_DIR/sync_to_nuc.sh"
 
