@@ -30,6 +30,8 @@ export DIST_ZERO_QUOTA="${DIST_ZERO_QUOTA:-0.10}"
 [[ -n "${KRONOS_BAR_THRESHOLD:-}" ]] && export KRONOS_BAR_THRESHOLD
 [[ -n "${HIDDEN_MULT_COVERAGE_MAX:-}" ]] && export HIDDEN_MULT_COVERAGE_MAX
 [[ -n "${HIDDEN_MULT_SPIKE_MULT:-}" ]] && export HIDDEN_MULT_SPIKE_MULT
+[[ -n "${MAX_WIN:-}" ]] && export MAX_WIN
+[[ -n "${MAX_GLOBAL_MULT:-}" ]] && export MAX_GLOBAL_MULT
 [[ -n "${BR0_VARIANT:-}" ]] && export BR0_VARIANT
 
 SIM_BASE="${SIM_BASE:-150000}"
@@ -47,7 +49,7 @@ fi
 run_one() {
   local tag="$1"
   export TAG="$tag"
-  echo "========== tune_clash_kronos: $tag (FG=$DIST_FG_QUOTA ZERO=$DIST_ZERO_QUOTA WILD=${KRONOS_WILD_PROB:-default} BAR=${KRONOS_BAR_THRESHOLD:-default} BR0=${BR0_VARIANT:-stock}) =========="
+  echo "========== tune_clash_kronos: $tag (FG=$DIST_FG_QUOTA ZERO=$DIST_ZERO_QUOTA WILD=${KRONOS_WILD_PROB:-default} BAR=${KRONOS_BAR_THRESHOLD:-default} MAX_WIN=${MAX_WIN:-10000} MAX_GMULT=${MAX_GLOBAL_MULT:-off} BR0=${BR0_VARIANT:-stock}) =========="
 
   if [[ "$SKIP_NUC" != "1" ]]; then
     if [[ "${SYNC_NUC_LOCAL:-0}" == "1" ]]; then
@@ -60,6 +62,8 @@ run_one() {
     [[ -n "${KRONOS_BAR_THRESHOLD:-}" ]] && ps_args="$ps_args -KronosBarThreshold $KRONOS_BAR_THRESHOLD"
     [[ -n "${HIDDEN_MULT_COVERAGE_MAX:-}" ]] && ps_args="$ps_args -HiddenMultCoverageMax $HIDDEN_MULT_COVERAGE_MAX"
     [[ -n "${HIDDEN_MULT_SPIKE_MULT:-}" ]] && ps_args="$ps_args -HiddenMultSpikeMult $HIDDEN_MULT_SPIKE_MULT"
+    [[ -n "${MAX_WIN:-}" ]] && ps_args="$ps_args -MaxWin $MAX_WIN"
+    [[ -n "${MAX_GLOBAL_MULT:-}" ]] && ps_args="$ps_args -MaxGlobalMult $MAX_GLOBAL_MULT"
     nuc_ssh "cd $(nuc_repo_path) && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_clash_kronos_sims.ps1 $ps_args"
     "$SCRIPT_DIR/pull_library_from_nuc.sh"
   fi

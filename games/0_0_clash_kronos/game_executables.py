@@ -1,6 +1,7 @@
 """Clash of Kronos executables — hidden mults, global mult, Kronos bar/transform."""
 
 from game_calculations import GameCalculations
+from game_constants import MAX_GLOBAL_MULT
 from game_events import (
     collect_hidden_mults_event,
     kronos_bar_event,
@@ -54,7 +55,10 @@ class GameExecutables(GameCalculations):
         if added <= 0:
             return
         prev = int(self.global_multiplier)
-        self.global_multiplier = prev + added
+        new_mult = prev + added
+        if MAX_GLOBAL_MULT > 0:
+            new_mult = min(new_mult, MAX_GLOBAL_MULT)
+        self.global_multiplier = new_mult
         collect_hidden_mults_event(self, collected, int(self.global_multiplier))
         if int(self.global_multiplier) != prev:
             update_global_mult_event(self)

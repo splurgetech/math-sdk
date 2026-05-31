@@ -29,7 +29,9 @@ class GameConfig(Config):
         self.game_id = "0_0_clash_kronos"
         self.provider_number = 0
         self.working_name = "Clash of Kronos"
-        self.wincap = 10000.0
+        # Max win ceiling (bet multiplier). Env-driven to A/B test 5000x vs 10000x.
+        max_win = float(os.environ.get("MAX_WIN") or "10000")
+        self.wincap = max_win
         self.win_type = "cluster"
         self.rtp = 0.965
         self.construct_paths()
@@ -69,7 +71,7 @@ class GameConfig(Config):
         for r, f in reels.items():
             self.reels[r] = self.read_reels_csv(os.path.join(self.reels_path, f))
 
-        mode_maxwins = {"base": 10000, "bonus": 10000}
+        mode_maxwins = {"base": max_win, "bonus": max_win}
 
         wincap_quota = 0.001
         dist_fg = float(os.environ.get("DIST_FG_QUOTA", "0.08"))

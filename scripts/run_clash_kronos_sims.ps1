@@ -14,6 +14,8 @@ param(
     [string]$KronosBarThreshold = "",
     [string]$HiddenMultCoverageMax = "",
     [string]$HiddenMultSpikeMult = "",
+    [string]$MaxWin = "",
+    [string]$MaxGlobalMult = "",
     [int]$SimThreads = 0,
     [switch]$UncappedFs
 )
@@ -41,6 +43,8 @@ if ($KronosWildProb) { $env:KRONOS_WILD_PROB = $KronosWildProb }
 if ($KronosBarThreshold) { $env:KRONOS_BAR_THRESHOLD = $KronosBarThreshold }
 if ($HiddenMultCoverageMax) { $env:HIDDEN_MULT_COVERAGE_MAX = $HiddenMultCoverageMax }
 if ($HiddenMultSpikeMult) { $env:HIDDEN_MULT_SPIKE_MULT = $HiddenMultSpikeMult }
+if ($MaxWin) { $env:MAX_WIN = $MaxWin }
+if ($MaxGlobalMult) { $env:MAX_GLOBAL_MULT = $MaxGlobalMult }
 if ($UncappedFs) { $env:KRONOS_UNCAPPED_FS = "1" } else { Remove-Item Env:KRONOS_UNCAPPED_FS -ErrorAction SilentlyContinue }
 
 if ($SimThreads -gt 0) {
@@ -55,7 +59,7 @@ $env:RUN_ANALYSIS = "0"
 $env:RUN_FORMAT_CHECKS = "0"
 
 Set-Location $GameDir
-Write-Host "SIM_BASE=$SimBase SIM_BONUS=$SimBonus SIM_THREADS=$($env:SIM_THREADS) PAYTABLE_SCALE=$($env:PAYTABLE_SCALE) DIST_FG=$($env:DIST_FG_QUOTA) DIST_ZERO=$($env:DIST_ZERO_QUOTA) KRONOS_WILD=$($env:KRONOS_WILD_PROB) KRONOS_BAR=$($env:KRONOS_BAR_THRESHOLD) (NUC sims only)" -ForegroundColor Cyan
+Write-Host "SIM_BASE=$SimBase SIM_BONUS=$SimBonus SIM_THREADS=$($env:SIM_THREADS) PAYTABLE_SCALE=$($env:PAYTABLE_SCALE) DIST_FG=$($env:DIST_FG_QUOTA) DIST_ZERO=$($env:DIST_ZERO_QUOTA) KRONOS_WILD=$($env:KRONOS_WILD_PROB) KRONOS_BAR=$($env:KRONOS_BAR_THRESHOLD) MAX_WIN=$($env:MAX_WIN) MAX_GLOBAL_MULT=$($env:MAX_GLOBAL_MULT) (NUC sims only)" -ForegroundColor Cyan
 & $venvPy run.py
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
