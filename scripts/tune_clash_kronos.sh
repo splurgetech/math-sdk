@@ -32,6 +32,7 @@ export DIST_ZERO_QUOTA="${DIST_ZERO_QUOTA:-0.10}"
 
 SIM_BASE="${SIM_BASE:-150000}"
 SIM_BONUS="${SIM_BONUS:-20000}"
+SIM_THREADS="${SIM_THREADS:-4}"
 SKIP_NUC="${SKIP_NUC:-0}"
 SKIP_OPT="${SKIP_OPT:-0}"
 
@@ -47,8 +48,8 @@ run_one() {
   echo "========== tune_clash_kronos: $tag (FG=$DIST_FG_QUOTA ZERO=$DIST_ZERO_QUOTA WILD=${KRONOS_WILD_PROB:-default} BAR=${KRONOS_BAR_THRESHOLD:-default} BR0=${BR0_VARIANT:-stock}) =========="
 
   if [[ "$SKIP_NUC" != "1" ]]; then
-    "$SCRIPT_DIR/sync_to_nuc.sh" --local
-    local ps_args="-SimBase $SIM_BASE -SimBonus $SIM_BONUS -PaytableScale $PAYTABLE_SCALE -DistFgQuota $DIST_FG_QUOTA -DistZeroQuota $DIST_ZERO_QUOTA"
+    "$SCRIPT_DIR/sync_to_nuc.sh"
+    local ps_args="-SimBase $SIM_BASE -SimBonus $SIM_BONUS -PaytableScale $PAYTABLE_SCALE -DistFgQuota $DIST_FG_QUOTA -DistZeroQuota $DIST_ZERO_QUOTA -SimThreads $SIM_THREADS"
     [[ -n "${KRONOS_WILD_PROB:-}" ]] && ps_args="$ps_args -KronosWildProb $KRONOS_WILD_PROB"
     [[ -n "${KRONOS_BAR_THRESHOLD:-}" ]] && ps_args="$ps_args -KronosBarThreshold $KRONOS_BAR_THRESHOLD"
     nuc_ssh "cd $(nuc_repo_path) && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_clash_kronos_sims.ps1 $ps_args"

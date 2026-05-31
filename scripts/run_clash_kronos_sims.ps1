@@ -12,6 +12,7 @@ param(
     [string]$DistZeroQuota = "",
     [string]$KronosWildProb = "",
     [string]$KronosBarThreshold = "",
+    [int]$SimThreads = 0,
     [switch]$UncappedFs
 )
 
@@ -38,7 +39,16 @@ if ($KronosWildProb) { $env:KRONOS_WILD_PROB = $KronosWildProb }
 if ($KronosBarThreshold) { $env:KRONOS_BAR_THRESHOLD = $KronosBarThreshold }
 if ($UncappedFs) { $env:KRONOS_UNCAPPED_FS = "1" } else { Remove-Item Env:KRONOS_UNCAPPED_FS -ErrorAction SilentlyContinue }
 
-if (-not $env:SIM_THREADS) { $env:SIM_THREADS = "10" }
+if ($SimThreads -gt 0) {
+    $env:SIM_THREADS = "$SimThreads"
+} elseif (-not $env:SIM_THREADS) {
+  # Windows spawn multiprocessing is flaky at 10 workers; 4 is reliable on the NUC.
+    if ($IsWindows -or $env:OS -match "Windows") {
+        $env:SIM_THREADS = "4"
+    } else {
+        $env:SIM_THREADS = "10"
+    }
+}
 $env:PYTHONUNBUFFERED = "1"
 $env:RUN_SIMS = "1"
 $env:RUN_OPTIMIZATION = "0"
@@ -46,7 +56,7 @@ $env:RUN_ANALYSIS = "0"
 $env:RUN_FORMAT_CHECKS = "0"
 
 Set-Location $GameDir
-Write-Host "SIM_BASE=$SimBase SIM_BONUS=$SimBonus PAYTABLE_SCALE=$($env:PAYTABLE_SCALE) DIST_FG=$($env:DIST_FG_QUOTA) DIST_ZERO=$($env:DIST_ZERO_QUOTA) KRONOS_WILD=$($env:KRONOS_WILD_PROB) KRONOS_BAR=$($env:KRONOS_BAR_THRESHOLD) (NUC sims only)" -ForegroundColor Cyan
+Write-Host "SIM_BASE=$SimBase SIM_BONUS=$SimBonus SIM_THREADS=$($env:SIM_THREADS) PAYTABLE_SCALE=$($env:PAYTABLE_SCALE) DIST_FG=$($env:DIST_FG_QUOTA) DIST_ZERO=$($env:DIST_ZERO_QUOTA) KRONOS_WILD=$($env:KRONOS_WILD_PROB) KRONOS_BAR=$($env:KRONOS_BAR_THRESHOLD) (NUC sims only)" -ForegroundColor Cyan
 & $venvPy run.py
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 

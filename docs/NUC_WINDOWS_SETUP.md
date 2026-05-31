@@ -62,7 +62,7 @@ Restart PowerShell or ensure `%USERPROFILE%\.cargo\bin` is on **PATH** for SSH s
 | Sync code | `./scripts/sync_to_nuc.sh` |
 | Uncommitted Mac changes | `./scripts/sync_to_nuc.sh --local` (tar; use sparingly) |
 | Run sims (default 150k base, 0 bonus, scale **1.0**) | `./scripts/run_sims_on_nuc.sh` |
-| Custom counts / scale | `./scripts/run_sims_on_nuc.sh 150000 0 1.0` |
+| Custom counts / scale / threads | `./scripts/run_sims_on_nuc.sh 150000 20000 1.0` (set `SIM_THREADS=4` on Windows NUC) |
 | Pull results | `./scripts/pull_library_from_nuc.sh` |
 | RTP from pulled CSVs | `./scripts/rtp_from_lookup.sh` |
 | Optimization only (after sims; Rust required) | **Mac (recommended):** `./scripts/run_optimization.sh` — CPU-heavy, light on RAM. **NUC:** `./scripts/run_optimization_on_nuc.sh` (needs MSVC Build Tools) |
