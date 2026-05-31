@@ -37,10 +37,14 @@ export KRONOS_WILD_PROB=0.18
 
 log() { echo "[$(date +%H:%M:%S)] $*" | tee -a "$LOG"; }
 
-log "========== $TAG: rebuild BR0 (strong cool) =========="
-cd "$GAME_DIR"
-git checkout HEAD -- reels/BR0.csv 2>/dev/null || true
-BR0_COOL_STRONG=1 python3 build_br0_cool.py 2>&1 | tee -a "$LOG"
+# BR0 strong-cool is committed in git; do not rebuild here (double-cool bug).
+# To regenerate once: cd games/0_0_clash_kronos && git checkout HEAD -- reels/BR0.csv && BR0_COOL_STRONG=1 python3 build_br0_cool.py && commit.
+if [[ "${BUNDLE_B_REBUILD_BR0:-0}" == "1" ]]; then
+  log "========== $TAG: rebuild BR0 (strong cool, from stock in git) =========="
+  cd "$GAME_DIR"
+  git checkout HEAD -- reels/BR0.csv 2>/dev/null || true
+  BR0_COOL_STRONG=1 python3 build_br0_cool.py 2>&1 | tee -a "$LOG"
+fi
 
 log "========== $TAG sim+opt (FG=$DIST_FG_QUOTA ZERO=$DIST_ZERO_QUOTA scale=$PAYTABLE_SCALE) =========="
 "$SCRIPT_DIR/tune_clash_kronos.sh" 2>&1 | tee -a "$LOG"
