@@ -25,7 +25,9 @@ KRONOS_WILD_PROB="${KRONOS_WILD_PROB:-0.18}"
 KRONOS_BAR_THRESHOLD="${KRONOS_BAR_THRESHOLD:-28}"
 HIDDEN_MULT_COVERAGE_MAX="${HIDDEN_MULT_COVERAGE_MAX:-0.42}"
 HIDDEN_MULT_SPIKE_MULT="${HIDDEN_MULT_SPIKE_MULT:-0.3}"
-MAX_GLOBAL_MULT="${MAX_GLOBAL_MULT:-25}"
+# Global multiplier is the core game mechanic — it MUST stay uncapped (0 = off).
+# This knob exists only as an optional safety rail; never use it as a balance lever.
+MAX_GLOBAL_MULT="${MAX_GLOBAL_MULT:-0}"
 
 POLL_SECS="${POLL_SECS:-180}"
 MAX_WAIT_SECS="${MAX_WAIT_SECS:-10800}"   # 3h hard ceiling per variant

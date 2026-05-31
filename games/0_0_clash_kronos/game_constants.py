@@ -10,8 +10,9 @@ SYMBOL_WILD = "W"
 KRONOS_BAR_THRESHOLD = int(os.environ.get("KRONOS_BAR_THRESHOLD") or "20")
 KRONOS_WILD_PROBABILITY = float(os.environ.get("KRONOS_WILD_PROB") or "0.25")
 
-# Cap on the additive global multiplier (0 = uncapped). Primary FG-magnitude lever:
-# the global mult accumulates across FS spins and is the biggest raw_base amplifier.
+# Safety rail ONLY (0 = uncapped, the intended default). The accumulating global
+# multiplier is the core game mechanic and must stay effectively uncapped — never use
+# this as a balance lever; if ever set, it must be an insanely high ceiling.
 MAX_GLOBAL_MULT = int(os.environ.get("MAX_GLOBAL_MULT") or "0")
 
 # Hidden mult coverage: uniform fraction of grid cells per spin (min 10% per design)
