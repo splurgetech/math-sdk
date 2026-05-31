@@ -58,15 +58,25 @@ if (-not $Worker) {
     Set-Content -Path $StatusFile -Value ("RUNNING " + (Get-Date -Format o)) -Encoding ascii
     "=== launch $(Get-Date -Format o) MaxWin=$MaxWin MaxGlobalMult=$MaxGlobalMult ===" | Out-File -FilePath $LogFile -Encoding ascii
 
+    # Spawn the worker via Win32_Process.Create so it is NOT a child of the sshd
+    # session and survives SSH disconnect / Mac sleep (Start-Process gets reaped on logoff).
     $self = $MyInvocation.MyCommand.Path
-    $workerArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $self, "-Worker") + $argList
-    $proc = Start-Process -FilePath "powershell.exe" -ArgumentList $workerArgs -PassThru -WindowStyle Hidden
-    Write-Host "DETACHED worker PID $($proc.Id). Sentinel: $StatusFile"
+    $argStr = ($argList | ForEach-Object { "$_" }) -join " "
+    $cmd = "powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$self`" -Worker $argStr"
+    $res = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = $cmd; CurrentDirectory = $RepoRoot }
+    if ($res.ReturnValue -ne 0 -or -not $res.ProcessId) {
+        Set-Content -Path $StatusFile -Value ("FAIL spawn $($res.ReturnValue) " + (Get-Date -Format o)) -Encoding ascii
+        Write-Host "FAILED to spawn worker (ReturnValue=$($res.ReturnValue))"
+        exit 1
+    }
+    Write-Host "DETACHED worker PID $($res.ProcessId). Sentinel: $StatusFile"
     exit 0
 }
 
 # --- Worker: run sims, record outcome. ---
 try {
+    Set-Location $RepoRoot
+    ("=== worker start $(Get-Date -Format o) pid $PID ===") | Out-File -FilePath $LogFile -Append -Encoding ascii
     & $SimScript @argList *>> $LogFile
     $code = $LASTEXITCODE
     if ($null -eq $code) { $code = 0 }
