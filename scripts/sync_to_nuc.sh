@@ -28,6 +28,8 @@ if [[ "$LOCAL_ONLY" == true ]]; then
     --exclude='./env' \
     --exclude='./.git' \
     --exclude='./games/*/library/temp_multi_threaded_files' \
+    --exclude='./games/*/library/tuning_runs' \
+    --exclude='./games/*/library/optimization_files' \
     --exclude='./games/*/library/publish_files/*.zst' \
     --exclude='./games/*/library/books/*.jsonl' \
     . | nuc_ssh "cd $(nuc_repo_path) && tar xzf -"

@@ -52,6 +52,7 @@ fi
 
 echo "=== Local optimization (OPT_MODES=${OPT_MODES:-all with lookup}) RUST_THREADS=${RUST_THREADS:-20} ==="
 cd "$GAME_DIR"
+# Do not inherit PYTHONPATH (e.g. web-sdk on Mac breaks math-sdk imports).
 export PYTHONPATH="$REPO_ROOT:$GAME_DIR"
 "$PY" run.py
 

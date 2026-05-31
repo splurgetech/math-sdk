@@ -116,6 +116,65 @@ RUN_OPTIMIZATION=1 RUN_ANALYSIS=1 SIM_BASE=100000 SIM_BONUS=30000 python run.py
 
 ---
 
+## Live monitoring (Glances, iPhone / browser)
+
+Headless NUC: simple CPU / RAM / **process list** in Safari (e.g. spare iPhone). Netdata is **disabled** (too busy; Windows free tier is limited).
+
+| Item | Value |
+|------|--------|
+| URL | **http://192.168.84.161:61208** |
+| Auto-start | Scheduled task `GlancesWebNUC` (boot) |
+| Install / reinstall | `powershell -ExecutionPolicy Bypass -File C:\Users\evanl\math-sdk\scripts\nuc_install_glances.ps1` |
+
+On the iPhone: Safari → URL above → **Share → Add to Home Screen**.
+
+During sims: sort processes by **CPU** and look for **python**.
+
+---
+
+## Clash Kronos tune pipeline (preferred)
+
+One iteration: sync → NUC sims → pull → Mac optimize → append `library/tuning_log.csv`:
+
+```bash
+DIST_FG_QUOTA=0.08 DIST_ZERO_QUOTA=0.10 TAG=quota_fg08_zero10 \
+  ./scripts/tune_clash_kronos.sh
+```
+
+| Script | Purpose |
+|--------|---------|
+| `tune_clash_kronos.sh` | Main loop (env: `SIM_BASE`, `SIM_BONUS`, `DIST_*`, `TAG`, `SKIP_NUC`, `SKIP_OPT`) |
+| `sweep_fg_quota.sh` | Small matrix: FG 4/5/6% × zero 10/12% |
+| `sample_buckets_overnight.sh` | Detached NUC sims + poll + pull + opt (e.g. 40% zero / 10% FG) |
+| `run_rtp_report.sh` | Raw + publish RTP, segmented means, zero-weight % |
+| `summarize_tuning_log.sh` | Print `library/tuning_log.csv` sorted by raw_base |
+| `nuc_sim_worker.ps1` / `start_nuc_sims_detached.ps1` | Run sims on NUC without blocking SSH |
+| `nuc_cleanup_sim_host.ps1` | Free RAM/CPU before long sim runs |
+
+**After NUC reboot:** run cleanup, clear `games/0_0_clash_kronos/library/temp_multi_threaded_files/`, then tune.
+
+**Windows sim stalls (~7/10 threads, idle CPU):** reboot NUC, kill stray `python.exe` (not Glances), retry detached worker or `SIM_THREADS=1`.
+
+Legacy / experimental (not needed for normal quota tuning): `overnight_clash_kronos_tune.sh` (3× BR0 variants), `sweep_base_overnight.sh` (16-run Kronos×BR0 matrix).
+
+---
+
+## Sim-host cleanup (free RAM / CPU for sims)
+
+One-shot tune from Mac:
+
+```bash
+ssh nuc "powershell -ExecutionPolicy Bypass -File C:/Users/evanl/math-sdk/scripts/nuc_cleanup_sim_host.ps1"
+```
+
+Script: `scripts/nuc_cleanup_sim_host.ps1` — High/Ultimate performance power plan, uninstall Netdata, disable telemetry/search/Xbox/OneDrive startup, Intel survey tasks, Game DVR, etc. **Keeps** OpenSSH, Defender, Windows Update, Python 3.12, Rust/MSVC, Glances.
+
+Audit only: `scripts/nuc_audit.ps1`
+
+**After cleanup:** reboot the NUC once. Optionally uninstall unused apps (Chrome, Epic, MindManager, **Python 3.14** if you only use 3.12 for sims).
+
+---
+
 ## NUC paths
 
 | Item | Path |
@@ -140,7 +199,10 @@ Stake docs recommend **Python ≥ 3.12**. The NUC uses **`py -3.12`** via `scrip
 | `Permission denied` SSH | Use `ssh nuc`; check `~/.ssh/winpc` on NUC `authorized_keys` |
 | `Not a git repo` on NUC | Run `./scripts/nuc_bootstrap.sh` |
 | Sim OOM | Lower bonus sims; run base only: `./scripts/run_sims_on_nuc.sh 150000 0` |
+| Sims hang / partial threads | Reboot NUC; `nuc_cleanup_sim_host.ps1`; use `start_nuc_sims_detached.ps1` or `SIM_THREADS=1` |
+| `sync_to_nuc.sh --local` slow | Excludes `library/tuning_runs` and `optimization_files` from tar |
 | numpy build fail | Use Python 3.12 + `setup_windows.ps1`, not raw 3.14 without wheels |
 | Optimization fails (`cargo` not found) | Run `scripts\nuc_install_rust.ps1`; add `%USERPROFILE%\.cargo\bin` to PATH |
 | Optimization fails (`link.exe` not found) | Run `scripts\nuc_install_rust.ps1` (installs VS 2022 Build Tools + C++ via winget). Reboot NUC if winget asks. Then `cd optimization_program` and `cargo build --release`. `run_opt_on_nuc.ps1` prepends MSVC to PATH for SSH. |
 | Post-quantum SSH warnings on Mac | Harmless on LAN; optional `WarnWeakCrypto no` under `Host nuc` |
+| Glances not loading from phone | Rerun `nuc_install_glances.ps1` on NUC (opens TCP 61208, starts `GlancesWebNUC` task) |

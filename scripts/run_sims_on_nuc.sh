@@ -19,6 +19,8 @@ PAYTABLE_SCALE="${3:-1.0}"
 "$SCRIPT_DIR/sync_to_nuc.sh"
 
 echo "=== Running sims on NUC (base=$SIM_BASE bonus=$SIM_BONUS scale=$PAYTABLE_SCALE) ==="
-nuc_ssh "cd $(nuc_repo_path) && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_clash_kronos_sims.ps1 -SimBase $SIM_BASE -SimBonus $SIM_BONUS -PaytableScale $PAYTABLE_SCALE"
+DIST_FG_QUOTA="${DIST_FG_QUOTA:-0.08}"
+DIST_ZERO_QUOTA="${DIST_ZERO_QUOTA:-0.10}"
+nuc_ssh "cd $(nuc_repo_path) && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_clash_kronos_sims.ps1 -SimBase $SIM_BASE -SimBonus $SIM_BONUS -PaytableScale $PAYTABLE_SCALE -DistFgQuota $DIST_FG_QUOTA -DistZeroQuota $DIST_ZERO_QUOTA"
 
 echo "=== Sims finished. Pull results: ./scripts/pull_library_from_nuc.sh ==="
