@@ -27,6 +27,7 @@ export SIM_BASE="${SIM_BASE:-150000}"
 export SIM_BONUS="${SIM_BONUS:-20000}"
 export SIM_THREADS="${SIM_THREADS:-10}"
 export BR0_VARIANT=cool_strong
+export SYNC_NUC_LOCAL=1
 
 # Feature cool-down (big tail cut)
 export HIDDEN_MULT_COVERAGE_MAX=0.40

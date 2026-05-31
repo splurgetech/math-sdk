@@ -50,7 +50,11 @@ run_one() {
   echo "========== tune_clash_kronos: $tag (FG=$DIST_FG_QUOTA ZERO=$DIST_ZERO_QUOTA WILD=${KRONOS_WILD_PROB:-default} BAR=${KRONOS_BAR_THRESHOLD:-default} BR0=${BR0_VARIANT:-stock}) =========="
 
   if [[ "$SKIP_NUC" != "1" ]]; then
-    "$SCRIPT_DIR/sync_to_nuc.sh"
+    if [[ "${SYNC_NUC_LOCAL:-0}" == "1" ]]; then
+      "$SCRIPT_DIR/sync_to_nuc.sh" --local
+    else
+      "$SCRIPT_DIR/sync_to_nuc.sh"
+    fi
     local ps_args="-SimBase $SIM_BASE -SimBonus $SIM_BONUS -PaytableScale $PAYTABLE_SCALE -DistFgQuota $DIST_FG_QUOTA -DistZeroQuota $DIST_ZERO_QUOTA -SimThreads $SIM_THREADS"
     [[ -n "${KRONOS_WILD_PROB:-}" ]] && ps_args="$ps_args -KronosWildProb $KRONOS_WILD_PROB"
     [[ -n "${KRONOS_BAR_THRESHOLD:-}" ]] && ps_args="$ps_args -KronosBarThreshold $KRONOS_BAR_THRESHOLD"
