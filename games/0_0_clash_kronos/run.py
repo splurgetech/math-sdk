@@ -43,7 +43,11 @@ def _optimization_target_modes(gamestate, num_sim_args: dict) -> list:
 
 
 if __name__ == "__main__":
-    num_threads = 10
+    import multiprocessing
+
+    multiprocessing.freeze_support()
+
+    num_threads = int(os.environ.get("SIM_THREADS", "10"))
     rust_threads = int(os.environ.get("RUST_THREADS", "20"))
     batching_size = 50000
     compression = True
@@ -55,6 +59,15 @@ if __name__ == "__main__":
     }
 
     run_sims = _env_bool("RUN_SIMS", "1")
+    if run_sims and os.environ.get("ALLOW_MAC_SIMS", "").strip() != "1":
+        import platform
+
+        if platform.system() == "Darwin":
+            raise SystemExit(
+                "RUN_SIMS on macOS is disabled (overheating). Run sims on the NUC via "
+                "./scripts/run_sims_on_nuc.sh or tune_clash_kronos.sh. "
+                "Set ALLOW_MAC_SIMS=1 only for tiny local smoke tests."
+            )
     run_conditions = {
         "run_sims": run_sims,
         "run_optimization": _env_bool("RUN_OPTIMIZATION"),

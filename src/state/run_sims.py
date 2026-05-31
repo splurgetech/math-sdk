@@ -1,3 +1,4 @@
+import os
 import time
 import math
 import random
@@ -262,10 +263,28 @@ def run_multi_process_sims(
                 print("Started thread", thread)
                 process.start()
                 processes += [process]
-            print("All threads are online.")
-            for process in processes:
-                process.join()
-            print("Finished joining threads.")
-            gamestate.combine(all_betmode_configs, betmode)
-            gamestate.get_betmode(betmode).lock_force_keys()
-            manager.shutdown()
+            print("All threads are online.", flush=True)
+            join_timeout = int(os.environ.get("SIM_JOIN_TIMEOUT_SEC", "7200"))
+            try:
+                for thread_idx, process in enumerate(processes):
+                    process.join(timeout=join_timeout)
+                    if process.is_alive():
+                        print(
+                            f"Thread {thread_idx} exceeded {join_timeout}s, terminating...",
+                            flush=True,
+                        )
+                        process.terminate()
+                        process.join(timeout=30)
+                        if process.is_alive():
+                            process.kill()
+                            process.join(timeout=10)
+                        raise RuntimeError(f"Sim worker thread {thread_idx} timed out")
+                    if process.exitcode not in (0, None):
+                        raise RuntimeError(
+                            f"Sim worker thread {thread_idx} failed (exit code {process.exitcode})"
+                        )
+                print("Finished joining threads.", flush=True)
+                gamestate.combine(all_betmode_configs, betmode)
+                gamestate.get_betmode(betmode).lock_force_keys()
+            finally:
+                manager.shutdown()
