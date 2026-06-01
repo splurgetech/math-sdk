@@ -20,11 +20,11 @@ class OptimizationSetup:
                         rtp=0.01, av_win=wincaps["base"], search_conditions=wincaps["base"]
                     ).return_dict(),
                     "0": ConstructConditions(rtp=0, av_win=0, search_conditions=0).return_dict(),
-                    # Cluster-style split scaled to betmode rtp 0.965 (0.01 + 0.368 + 0.587).
+                    # Cluster sample fences scaled to betmode rtp 0.965 (0.01 + 0.37 + 0.585).
                     "freegame": ConstructConditions(
-                        rtp=0.368, hr=200, search_conditions={"symbol": "scatter"}
+                        rtp=0.37, hr=200, search_conditions={"symbol": "scatter"}
                     ).return_dict(),
-                    "basegame": ConstructConditions(hr=3.5, rtp=0.587).return_dict(),
+                    "basegame": ConstructConditions(hr=3.5, rtp=0.585).return_dict(),
                 },
                 "scaling": ConstructScaling(
                     [

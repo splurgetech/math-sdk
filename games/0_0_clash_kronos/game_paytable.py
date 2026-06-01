@@ -9,7 +9,7 @@ PAYTABLE_SCALE = float(os.environ.get("PAYTABLE_SCALE", "0.1"))
 
 # Final pay caps (bet multipliers) — cluster-sample-aligned; applied after PAYTABLE_SCALE.
 PAYTABLE_SYMBOL_CAPS = {
-    "H1": float(os.environ.get("PAYTABLE_CAP_H1", "60")),
+    "H1": float(os.environ.get("PAYTABLE_CAP_H1", "100")),
     "H2": float(os.environ.get("PAYTABLE_CAP_H2", "40")),
     "H3": float(os.environ.get("PAYTABLE_CAP_H3", "30")),
     "L1": float(os.environ.get("PAYTABLE_CAP_L1", "10")),

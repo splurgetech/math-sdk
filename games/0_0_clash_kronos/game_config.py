@@ -74,7 +74,7 @@ class GameConfig(Config):
         mode_maxwins = {"base": max_win, "bonus": max_win}
 
         wincap_quota = 0.001
-        dist_fg = float(os.environ.get("DIST_FG_QUOTA", "0.08"))
+        dist_fg = float(os.environ.get("DIST_FG_QUOTA", "0.10"))
         dist_zero = float(os.environ.get("DIST_ZERO_QUOTA", "0.10"))
         dist_base = 1.0 - wincap_quota - dist_fg - dist_zero
         if dist_base <= 0:
