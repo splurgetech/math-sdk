@@ -16,6 +16,7 @@ PAYTABLE_SYMBOL_CAPS = {
     "L2": float(os.environ.get("PAYTABLE_CAP_L2", "8")),
     "L3": float(os.environ.get("PAYTABLE_CAP_L3", "5")),
     "L4": float(os.environ.get("PAYTABLE_CAP_L4", "4")),
+    "L5": float(os.environ.get("PAYTABLE_CAP_L5", "4")),
 }
 
 
@@ -32,6 +33,7 @@ FAN = (1.00, 2.00, 4.00, 8.00, 15.00, 30.00, 50.00)
 HELMET = (2.00, 4.00, 8.00, 15.00, 30.00, 60.00, 100.00)
 
 SYMBOL_TIERS = {
+    "L5": GEM,
     "L4": GEM,
     "L3": GEM,
     "L2": GEM,

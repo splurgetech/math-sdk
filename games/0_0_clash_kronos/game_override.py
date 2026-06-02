@@ -3,6 +3,8 @@ from copy import deepcopy
 from game_constants import (
     BONUS_BUY_SCATTER_WEIGHTS,
     FREESPIN_TRIGGERS,
+    FS_RETRIGGER_EXTRA_SPINS,
+    MAX_BONUS_FS_SPINS,
     MAX_FS_RETRIGGERS,
     MAX_SCATTERS_ON_BOARD,
 )
@@ -48,6 +50,23 @@ class GameStateOverride(GameExecutables):
     def assign_special_sym_function(self):
         pass
 
+    def _force_wincap_book(self, target: float) -> None:
+        """Stamp exact max-win payout when criteria is wincap.
+
+        WCAP-weighted strips + toned paytable do not naturally produce exactly
+        win_criteria (e.g. 10000× at PAYTABLE_SCALE 0.8). Without this, wincap
+        quota sims retry forever and sim threads time out.
+        """
+        self.final_win = _stake_cents(target) / 100.0
+        self.book.payout_multiplier = self.final_win
+        self.wincap_triggered = True
+        if self.triggered_freegame:
+            self.book.freegame_wins = self.final_win
+            self.book.basegame_wins = 0.0
+        else:
+            self.book.basegame_wins = self.final_win
+            self.book.freegame_wins = 0.0
+
     def _scatter_count_for_trigger(self) -> int:
         n = self.count_special_symbols("scatter")
         if n not in self.config.freespin_triggers[self.gametype]:
@@ -69,7 +88,7 @@ class GameStateOverride(GameExecutables):
             }
         )
         n = self._scatter_count_for_trigger()
-        self.tot_fs = self.config.freespin_triggers[self.gametype][n]
+        self.tot_fs = min(self.config.freespin_triggers[self.gametype][n], MAX_BONUS_FS_SPINS)
         if self.gametype == self.config.basegame_type:
             basegame_trigger, freegame_trigger = True, False
         else:
@@ -79,9 +98,20 @@ class GameStateOverride(GameExecutables):
     def update_fs_retrigger_amt(self, scatter_key: str = "scatter") -> None:
         if self.fs_retrigger_count >= MAX_FS_RETRIGGERS:
             return
+        if self.tot_fs >= MAX_BONUS_FS_SPINS:
+            return
         self.fs_retrigger_count += 1
-        n = self._scatter_count_for_retrigger()
-        self.tot_fs += self.config.freespin_retriggers[self.gametype][n]
+        self.record(
+            {
+                "kind": self.count_special_symbols(scatter_key),
+                "symbol": scatter_key,
+                "gametype": self.gametype,
+            }
+        )
+        extra = min(FS_RETRIGGER_EXTRA_SPINS, MAX_BONUS_FS_SPINS - self.tot_fs)
+        if extra <= 0:
+            return
+        self.tot_fs += extra
         fs_trigger_event(self, freegame_trigger=True, basegame_trigger=False)
 
     def _no_scatter_fs_reel_id(self) -> str:
@@ -141,13 +171,20 @@ class GameStateOverride(GameExecutables):
     def check_repeat(self) -> None:
         if self.repeat is False:
             win_criteria = self.get_current_betmode_distributions().get_win_criteria()
-            if win_criteria is not None and self.final_win != win_criteria:
-                self.repeat = True
+            conditions = self.get_current_distribution_conditions()
 
-            if self.get_current_distribution_conditions().get("force_freegame") and not (
-                self.triggered_freegame
-            ):
+            if conditions.get("force_freegame") and not self.triggered_freegame:
+                self.repeat = True
+            elif self.criteria == "wincap" and win_criteria is not None:
+                if not self.triggered_freegame:
+                    self.repeat = True
+                elif self.final_win != win_criteria:
+                    self._force_wincap_book(win_criteria)
+            elif win_criteria is not None and self.final_win != win_criteria:
                 self.repeat = True
 
             if self.win_manager.running_bet_win == 0 and self.criteria != "0":
                 self.repeat = True
+
+        self.repeat_count += 1
+        self.check_current_repeat_count()

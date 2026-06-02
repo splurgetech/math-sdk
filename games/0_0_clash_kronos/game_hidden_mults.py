@@ -5,6 +5,7 @@ import random
 from game_constants import (
     HIDDEN_MULT_COVERAGE_MAX,
     HIDDEN_MULT_COVERAGE_MIN,
+    HIDDEN_MULT_COVERAGE_MODE,
     VISIBLE_CELL_COUNT,
     hidden_mult_value_weights,
 )
@@ -17,7 +18,11 @@ def _weighted_hidden_value() -> int:
 
 def assign_hidden_mults(num_reels: int, num_rows: list) -> list[list[int]]:
     """Return per-cell hidden mult values (0 = none)."""
-    coverage = random.uniform(HIDDEN_MULT_COVERAGE_MIN, HIDDEN_MULT_COVERAGE_MAX)
+    coverage = random.triangular(
+        HIDDEN_MULT_COVERAGE_MIN,
+        HIDDEN_MULT_COVERAGE_MAX,
+        HIDDEN_MULT_COVERAGE_MODE,
+    )
     target = max(0, min(VISIBLE_CELL_COUNT, int(VISIBLE_CELL_COUNT * coverage)))
     all_cells = [(r, row) for r in range(num_reels) for row in range(num_rows[r])]
     random.shuffle(all_cells)

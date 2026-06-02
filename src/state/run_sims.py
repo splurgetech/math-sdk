@@ -107,6 +107,23 @@ def assign_sim_criteria(num_sims_criteria: Dict[str, int], sims: int) -> Dict[in
     return {i: sim_allocation[i] for i in range(min(sims, len(sim_allocation)))}
 
 
+def stratify_criteria_assignment(sim_criteria: Dict[int, str], num_sims: int) -> list:
+    """Reorder criteria so each thread's contiguous sim block gets ~equal wincap/FG counts."""
+    counts: Dict[str, int] = {}
+    for i in range(num_sims):
+        c = sim_criteria[i]
+        counts[c] = counts.get(c, 0) + 1
+    names = list(counts.keys())
+    remaining = dict(counts)
+    ordered: list = []
+    while len(ordered) < num_sims:
+        for c in names:
+            if remaining[c] > 0:
+                ordered.append(c)
+                remaining[c] -= 1
+    return ordered
+
+
 def string_to_int(s: str) -> int:
     "Convert criteria name to large integer value"
     h = hashlib.sha256(s.encode()).hexdigest()
@@ -157,8 +174,8 @@ def run_multi_process_sims(
     if not set_sim_amount:
         num_sims_criteria = get_sim_splits(gamestate, num_sims, betmode)
         sim_criteria = assign_sim_criteria(num_sims_criteria, num_sims)
-        simulation_seeds = [i for i in range(len(sim_criteria))]
-        criteria_assignment = list(sim_criteria.values())
+        simulation_seeds = [i for i in range(num_sims)]
+        criteria_assignment = stratify_criteria_assignment(sim_criteria, num_sims)
     else:
         for bm in gamestate.config.bet_modes:
             if bm.get_name() == betmode:

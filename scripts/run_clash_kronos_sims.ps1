@@ -52,6 +52,9 @@ if ($SimThreads -gt 0) {
 } elseif (-not $env:SIM_THREADS) {
     $env:SIM_THREADS = "10"
 }
+if (-not $env:SIM_JOIN_TIMEOUT_SEC) {
+    $env:SIM_JOIN_TIMEOUT_SEC = "28800"
+}
 $env:PYTHONUNBUFFERED = "1"
 $env:RUN_SIMS = "1"
 $env:RUN_OPTIMIZATION = "0"
